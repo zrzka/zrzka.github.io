@@ -348,7 +348,7 @@ article.single section.body {
 /* Highlight Colors */
 
 article.single section.body h1 { color: var(--base0d); }
-article.single section.body h2 { color: var(--base0b); }
+article.single section.body h2 { color: var(--base0d); }
 article.single section.body h3 { color: var(--base09); }
 article.single section.body h4 { color: var(--base08); }
 article.single section.body h5 { color: var(--base02); }
