@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>performance on Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title>
+    <link>https://www.zrzka.dev/tags/performance/</link>
+    <description>Recent content in performance on Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 31 Oct 2016 00:00:46 +0100</lastBuildDate>
+    
+	<atom:link href="https://www.zrzka.dev/tags/performance/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>AWS journey — API Gateway &amp; Lambda &amp; VPC performance</title>
+      <link>https://www.zrzka.dev/2016/10/31/aws-journey-api-gateway-lambda-vpc-performance/</link>
+      <pubDate>Mon, 31 Oct 2016 00:00:46 +0100</pubDate>
+      
+      <guid>https://www.zrzka.dev/2016/10/31/aws-journey-api-gateway-lambda-vpc-performance/</guid>
+      <description>We decided to hide some EC2 instances in private subnets (VPC). They’re accessible via bastion hosts or via API (API Gateway &amp;amp; Lambda). Works well, but there’s one weird issue — cold lambda start time is over 10s sometimes. We experienced even 15s. This is not acceptable and I’m seeking for answers to my questions.
+ Does increased memory size help? Is this huge cold start time VPC related? Is there a difference when we do use another language?</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ec2 on Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title>
+    <link>https://www.zrzka.dev/tags/ec2/</link>
+    <description>Recent content in ec2 on Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 20 Oct 2016 11:28:46 +0100</lastBuildDate>
+    
+	<atom:link href="https://www.zrzka.dev/tags/ec2/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>AWS journey — EC2 Container Service</title>
+      <link>https://www.zrzka.dev/2016/10/20/aws-journey-ec2-container-service/</link>
+      <pubDate>Thu, 20 Oct 2016 11:28:46 +0100</pubDate>
+      
+      <guid>https://www.zrzka.dev/2016/10/20/aws-journey-ec2-container-service/</guid>
+      <description>We were using (and we’re still it using for some services) Docker Cloud. Main problem with DC is that they can’t handle private subnets. EC2 instance must be in the public subnet and that’s not what we want. Hooray (irony), we have to switch to the EC2 Container Service. Try to explain this to our business department. Additional time for infrastructure. Can handle it, but it’s tough sometimes.
+Docker images repository Cloud Formation Template This step is optional, but we’re trying to leverage as many as possible AWS services.</description>
+    </item>
+    
+  </channel>
+</rss>
