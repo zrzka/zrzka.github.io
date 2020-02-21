@@ -44,15 +44,15 @@ body {
   margin: 0;
   background-color: #2d2d2d;
   background-color: var(--base00);
-  color: #f2f0ec;
   color: var(--base07);
   line-height: 1.5;
-  font-size: 100%;
+  font-size: 16px;
   font-family: 'Source Code Pro', monospace;
 }
 
 .container {
-  max-width: 52em;
+  max-width: 90%;
+  width: 832px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -73,12 +73,10 @@ div.clearfix {
 
 article.single section,
 .article-list article {
-  background-color: #f2f0ec;
   background-color: var(--base07);
-  color: #2d2d2d;
   color: var(--base00);
-  padding-left: 8rem;
-  padding-right: 8rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
   padding-top: 1rem;
   padding-bottom: 1rem;
 }
@@ -92,7 +90,6 @@ article.single section,
 }
 
 header, footer {
-  background-color: #393939;
   background-color: var(--base01);
   padding-top: 1rem;
   padding-bottom: 1rem;
@@ -116,7 +113,6 @@ footer {
   margin-bottom: 1rem;
   text-align: center;
   font-size: 0.9em;
-  color: #747369;
   color: var(--base03);
 }
 
@@ -141,9 +137,9 @@ p {
   margin-bottom: 1rem;
 }
 
-h1 { font-size: 2rem }
-h2 { font-size: 1.5rem }
-h3 { font-size: 1.25rem }
+h1 { font-size: 1.5rem }
+h2 { font-size: 1.25rem }
+h3 { font-size: 1.rem }
 h4 { font-size: 1rem }
 h5 { font-size: .875rem }
 h6 { font-size: .75rem }
@@ -156,19 +152,16 @@ pre, code {
 /* Header Layout */
 
 header a.path {
-  color: #6699cc;
   color: var(--base0d);
 }
 
 header span.caret {
-  color: #f2f0ec;
   color: var(--base07);
 }
 
 /* Footer Layout */
 
 footer a {
-  color: #747369;
   color: var(--base03);
   text-decoration: none;
 }
@@ -183,7 +176,6 @@ footer a {
 .page-not-found h2 {
   text-align: center;
   font-size: 3em;
-  color: #a09f93;
   color: var(--base04);
   margin-bottom: 4rem;
 }
@@ -208,20 +200,18 @@ footer a {
 
 .homepage h1.site-title {
   text-align: center;
-  font-size: 5em;
-  color: #66cccc;
+  font-size: 18px;
   color: var(--base0c);
 }
 
 @media (--breakpoint-md) {
   .homepage h1.site-title {
-    font-size: 3em;
+    font-size: 3rem;
   }
 }
 
 .homepage h1.headline {
-  font-size: 3em;
-  color: #ffcc66;
+  font-size: 1.5rem;
   color: var(--base0a);
 }
 
@@ -230,10 +220,6 @@ footer a {
     padding-left: 2rem;
     padding-right: 2rem;
   }
-}
-
-.homepage .hero-logo img {
-  width: 100%;
 }
 
 .homepage section.categories,
@@ -246,7 +232,7 @@ footer a {
 .homepage .category a,
 .homepage .tag,
 .homepage .tag a {
-  color: #cc99cc;
+  font-size: 16px;
   color: var(--base0e);
 }
 
@@ -257,21 +243,19 @@ footer a {
 /* Post List Layout */
 
 .article-list h1.list-title {
-  font-size: 3em;
-  color: #ffcc66;
+  font-size: 1.5em;
   color: var(--base0a);
 }
 
 .article-list article {
-  padding-top: 4rem;
-  padding-bottom: 4rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
   margin-bottom: 4rem;
 }
 
 .article-list article h2.headline,
 .article-list article h2.headline a {
   margin-top: 0;
-  color: #6699cc;
   color: var(--base0d);
 }
 
@@ -280,13 +264,11 @@ footer a {
 }
 
 .article-list article .meta .key {
-  color: #747369;
   color: var(--base03);
 }
 
 .article-list article .meta .val,
 .article-list article .meta .val a {
-  color: #cc99cc;
   color: var(--base0e);
 }
 
@@ -299,12 +281,10 @@ nav.paginator {
 }
 
 nav.paginator a {
-  color: #cc99cc;
   color: var(--base0e);
 }
 
 nav.paginator .faded {
-  color: #515151;
   color: var(--base02);
 }
 
@@ -326,12 +306,10 @@ article.single .meta {
 }
 
 article.single .meta .key {
-  color: #747369;
   color: var(--base03);
 }
 
 article.single .meta .val, article.single .meta .val a {
-  color: #cc99cc;
   color: var(--base0e);
 }
 
@@ -344,8 +322,7 @@ article.single .meta .val, article.single .meta .val a {
 
 article.single h1.headline {
   margin-top: 0;
-  font-size: 3em;
-  color: #ffcc66;
+  font-size: 1.5em;
   color: var(--base0a);
 }
 
@@ -357,8 +334,8 @@ article.single h1.headline {
 }
 
 article.single section.body {
-  padding-top: 4rem;
-  padding-bottom: 3rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
 @media (--breakpoint-md) {
@@ -370,14 +347,14 @@ article.single section.body {
 
 /* Highlight Colors */
 
-article.single section.body h1 { color: #6699cc; color: var(--base0d); }
-article.single section.body h2 { color: #99cc99; color: var(--base0b); }
-article.single section.body h3 { color: #f99157; color: var(--base09); }
-article.single section.body h4 { color: #f2777a; color: var(--base08); }
-article.single section.body h5 { color: #515151; color: var(--base02); }
-article.single section.body h6 { color: #747369; color: var(--base03); }
+article.single section.body h1 { color: var(--base0d); }
+article.single section.body h2 { color: var(--base0b); }
+article.single section.body h3 { color: var(--base09); }
+article.single section.body h4 { color: var(--base08); }
+article.single section.body h5 { color: var(--base02); }
+article.single section.body h6 { color: var(--base03); }
 
-article.single section.body a { color: #d27b53; color: var(--base0f); }
+article.single section.body a { color: var(--base0f); }
 
 /* Article Elements */
 
@@ -385,12 +362,19 @@ article.single * {
   max-width: 100%;
 }
 
+article.single img {
+  display: block;
+  max-width: 80%;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 article.single pre {
   margin-top: 0;
-  margin-bottom: 1rem;
-  overflow-x: scroll;
+  overflow-x: auto;
   border-radius: 3px;
-  padding: 2rem;
+  padding: 1rem;
 }
 
 article.single p code {
@@ -398,19 +382,14 @@ article.single p code {
   border-radius: 3px;
   background: #747369;
   background: var(--base03);
-  color: #f2f0ec;
   color: var(--base07);
 }
 
 article.single figure, article.single div.highlight {
   box-sizing: border-box;
-  max-width: 52rem;
-  width: 52rem;
-  margin-left: -8rem;
-  margin-right: -8rem;
+  max-width: 100%;
+  width: 832px;
   margin-bottom: 1rem;
-  padding: 1em;
-  background-color: #393939;
   background-color: var(--base01);
 }
 
@@ -438,7 +417,6 @@ article.single figure figcaption h4 {
   text-align: center;
   font-style: italic;
   font-weight: normal;
-  color: #f2f0ec;
   color: var(--base07);
 }
 
@@ -455,7 +433,6 @@ article.single td {
   line-height: inherit;
   border-bottom-width: 1px;
   border-bottom-style: solid;
-  border-bottom-color: #a09f93;
   border-bottom-color: var(--base04);
 }
 
@@ -483,7 +460,6 @@ article.single hr {
   border: 0;
   border-bottom-style: solid;
   border-bottom-width: 1px;
-  border-bottom-color: #a09f93;
   border-bottom-color: var(--base04);
 }
 
