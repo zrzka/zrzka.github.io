@@ -1,451 +1,94 @@
-<!DOCTYPE html>
-<html lang="en-us">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="description"
-        content="">
-    <meta name="generator" content="Hugo 0.65.0" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/style.css" type="text/css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type="text/css">
-    <link rel="alternate" href="/index.xml" type="application/rss+xml" title="Robert Vojta (𝒵𝓇𝓏𝓀𝒶)">
-    <title>AWS journey — API Gateway &amp; Lambda &amp; VPC performance - Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title>
-</head>
-
-<body>
-
-    <header>
-        <div class="container clearfix">
-            <a class="path" href="https://www.zrzka.dev/">Home</a>
-            <span class="caret">% _</span>
-            <div class="right">
-                
-                
-                <a class="path" href="/about/">About</a>
-                
-                |
-                <a class="path" href="/site/">Site</a>
-                
-            </div>
-        </div>
-    </header>
-
-    <div class="container">
-
-<main role="main" class="article">
-  
-<article class="single" itemscope itemtype="http://schema.org/BlogPosting">
-  <div class="meta">
-
-    <span class="key">published on</span>
-    <span class="val"><time itemprop="datePublished" datetime="2016-10-31">October 31, 2016</time></span>
-
-
-    <span class="key">in</span>
-    <span class="val">
-
-        <a href="/categories/articles">articles</a>
-
-    </span>
-
-
-    <br>
-    <span class="key">tags:</span>
-    <span class="val">
-
-        <a href="/tags/aws">aws</a>
-
-        <a href="/tags/lambda">lambda</a>
-
-        <a href="/tags/api-gateway">api-gateway</a>
-
-        <a href="/tags/performance">performance</a>
-
-    </span>
-
-  </div>
-  <h1 class="headline" itemprop="headline">AWS journey — API Gateway &amp; Lambda &amp; VPC performance</h1>
-  <section class="body" itemprop="articleBody">
-    <p>We decided to hide some EC2 instances in private subnets (VPC). They’re accessible via bastion hosts or
-via API (API Gateway &amp; Lambda). Works well, but there’s one weird issue — cold lambda start time is
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=description content><meta name=generator content="Hugo 0.64.1"><meta name=viewport content="width=device-width,initial-scale=1"><link rel=stylesheet href=/css/style.css type=text/css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type=text/css><link rel=alternate href=/index.xml type=application/rss+xml title="Robert Vojta (𝒵𝓇𝓏𝓀𝒶)"><title>AWS journey — API Gateway & Lambda & VPC performance - Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title></head><body><header><div class="container clearfix"><a class=path href=https://www.zrzka.dev/>Home</a>
+<span class=caret>% _</span><div class=right><a class=path href=/about/>About</a>
+|
+<a class=path href=/site/>Site</a></div></div></header><div class=container><main role=main class=article><article class=single itemscope itemtype=http://schema.org/BlogPosting><div class=meta><span class=key>published on</span>
+<span class=val><time itemprop=datePublished datetime=2016-10-31>October 31, 2016</time></span>
+<span class=key>in</span>
+<span class=val><a href=/categories/articles>articles</a></span><br><span class=key>tags:</span>
+<span class=val><a href=/tags/aws>aws</a>
+<a href=/tags/lambda>lambda</a>
+<a href=/tags/api-gateway>api-gateway</a>
+<a href=/tags/performance>performance</a></span></div><h1 class=headline itemprop=headline>AWS journey — API Gateway & Lambda & VPC performance</h1><section class=body itemprop=articleBody><p>We decided to hide some EC2 instances in private subnets (VPC). They’re accessible via bastion hosts or
+via API (API Gateway & Lambda). Works well, but there’s one weird issue — cold lambda start time is
 over 10s sometimes. We experienced even 15s. This is not acceptable and I’m seeking for answers to my
-questions.</p>
-<ul>
-<li>Does increased memory size help?</li>
-<li>Is this huge cold start time VPC related?</li>
-<li>Is there a difference when we do use another language?</li>
-<li>When the lambda container is reused?</li>
-<li>Does some kind of keep alive requests help?</li>
-</ul>
-<p>Internet is full of answers, but they’re not clear. Wild guesses. So, I decided to quickly hack
-<a href="https://github.com/purposefly/lambda-performance">benchmark</a> to get more accurate (still not
-precise) answers.</p>
-<p>Scroll down if you’re not interested in details, but want to see results only.</p>
-<p>UPDATE: Thanks to Moshe Ben Shoham!</p>
-<blockquote>
-<p>Just in case anyone come across this great post, there are some good news: in re:invent 2018,
+questions.</p><ul><li>Does increased memory size help?</li><li>Is this huge cold start time VPC related?</li><li>Is there a difference when we do use another language?</li><li>When the lambda container is reused?</li><li>Does some kind of keep alive requests help?</li></ul><p>Internet is full of answers, but they’re not clear. Wild guesses. So, I decided to quickly hack
+<a href=https://github.com/purposefly/lambda-performance>benchmark</a> to get more accurate (still not
+precise) answers.</p><p>Scroll down if you’re not interested in details, but want to see results only.</p><p>UPDATE: Thanks to Moshe Ben Shoham!</p><blockquote><p>Just in case anyone come across this great post, there are some good news: in re:invent 2018,
 the Lambda team announced Lambda cold start in VPC is going to be a none issue soon,
 at least
-<a href="https://disq.us/url?url=https%3A%2F%2Fwww.nuweba.com%2FAWS-Lambda-in-a-VPC-will-soon-be-faster%3AlOAnKK5AIgvJB0Borcv4APtyB0Q&amp;cuid=5347123">according to this</a>
-.</p>
-</blockquote>
-<h2 id="lambda">Lambda</h2>
-<h3 id="limits">Limits</h3>
-<p>Always learn limits of your<a href="http://docs.aws.amazon.com/lambda/latest/dg/limits.html">enemy</a>. What’s
-interesting for now is number of concurrent executions. Default limit is 100.</p>
-<h3 id="cold-vshot">Cold vs Hot</h3>
-<p>Lambda function runs in a sandbox environment; container. Containers can be reused. Container created
+<a href="https://disq.us/url?url=https%3A%2F%2Fwww.nuweba.com%2FAWS-Lambda-in-a-VPC-will-soon-be-faster%3AlOAnKK5AIgvJB0Borcv4APtyB0Q&cuid=5347123">according to this</a>
+.</p></blockquote><h2 id=lambda>Lambda</h2><h3 id=limits>Limits</h3><p>Always learn limits of your<a href=http://docs.aws.amazon.com/lambda/latest/dg/limits.html>enemy</a>. What’s
+interesting for now is number of concurrent executions. Default limit is 100.</p><h3 id=cold-vshot>Cold vs Hot</h3><p>Lambda function runs in a sandbox environment; container. Containers can be reused. Container created
 for lambda A can’t be reused for lambda B, just for lambda A. There’s no clear answer when they’re
-reused. But I would like to know.</p>
-<p>Every container has ephemeral disk capacity (0.5GB) mounted to <em>/tmp</em>. Whatever lambda stores there,
+reused. But I would like to know.</p><p>Every container has ephemeral disk capacity (0.5GB) mounted to <em>/tmp</em>. Whatever lambda stores there,
 it stays there if container is reused. My reuse test is very simple. Container is reused if file
 <em>/tmp/perf.txt</em> exists. If not, lambda is going to create it. Check
-<a href="https://github.com/purposefly/lambda-performance/blob/master/lambda/python/perf_handler.py">Python</a>,
-<a href="https://github.com/purposefly/lambda-performance/blob/master/lambda/js/perf_handler.js">JavaScript</a>
+<a href=https://github.com/purposefly/lambda-performance/blob/master/lambda/python/perf_handler.py>Python</a>,
+<a href=https://github.com/purposefly/lambda-performance/blob/master/lambda/js/perf_handler.js>JavaScript</a>
 and
-<a href="https://github.com/purposefly/lambda-performance/blob/master/lambda/cljs/src/performance/core.cljs">ClojureScript</a>
-lambda function handlers.</p>
-<p>More info about container reuse on the
-<a href="https://aws.amazon.com/blogs/compute/container-reuse-in-lambda/">AWS blog</a>. Old, but enough to get a clue.</p>
-<h3 id="variants">Variants</h3>
-<p>I would like to see if there’s a difference between languages, memory sizes and VPC [not] set. I prepared several variants:</p>
-<ul>
-<li>Lambda functions in Python, JavaScript and ClojureScript</li>
-<li>Each configured with 128, 256, 512, 768, 1024, 1280, 1536MB of memory</li>
-<li>Each with and without VPC</li>
-</ul>
-<p>All possible combinations, 42 lambda functions.</p>
-<p>NOTE: There’s no way how configure CPU for lambda function. It’s tightly tied with memory size.
-Bigger memory size, faster CPU. This is the reason why I made different memory variants as well.</p>
-<h2 id="api-gateway">API Gateway</h2>
-<h3 id="limits-1">Limits</h3>
-<p>Again, your enemy <a href="http://docs.aws.amazon.com/apigateway/latest/developerguide/limits.html">limits</a>.
+<a href=https://github.com/purposefly/lambda-performance/blob/master/lambda/cljs/src/performance/core.cljs>ClojureScript</a>
+lambda function handlers.</p><p>More info about container reuse on the
+<a href=https://aws.amazon.com/blogs/compute/container-reuse-in-lambda/>AWS blog</a>. Old, but enough to get a clue.</p><h3 id=variants>Variants</h3><p>I would like to see if there’s a difference between languages, memory sizes and VPC [not] set. I prepared several variants:</p><ul><li>Lambda functions in Python, JavaScript and ClojureScript</li><li>Each configured with 128, 256, 512, 768, 1024, 1280, 1536MB of memory</li><li>Each with and without VPC</li></ul><p>All possible combinations, 42 lambda functions.</p><p>NOTE: There’s no way how configure CPU for lambda function. It’s tightly tied with memory size.
+Bigger memory size, faster CPU. This is the reason why I made different memory variants as well.</p><h2 id=api-gateway>API Gateway</h2><h3 id=limits-1>Limits</h3><p>Again, your enemy <a href=http://docs.aws.amazon.com/apigateway/latest/developerguide/limits.html>limits</a>.
 Requests per seconds default limit is 1,000. Burst 2,000. This limit is per account; don’t kill your
-other APIs with stress testing.</p>
-<h2 id="vpc">VPC</h2>
-<h3 id="limits-2">Limits</h3>
-<p>We’re interested in
-<a href="http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Appendix_Limits.html#vpc-limits-enis">ENI limits</a>.
+other APIs with stress testing.</p><h2 id=vpc>VPC</h2><h3 id=limits-2>Limits</h3><p>We’re interested in
+<a href=http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Appendix_Limits.html#vpc-limits-enis>ENI limits</a>.
 You can have 350 network interfaces per account. And here are
-<a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html#AvailableIpPerENI">limits per instance</a>.
-I’ve got t1.micro for the benchmark purpose, so, the limit is 2.</p>
-<h3 id="lambda-1">Lambda</h3>
-<p>Lambda function is not able to access VPC resources by default. You have to set at least one subnet
-and at least one security group from the same VPC to allow it to access VPC resources.</p>
-<p>NOTE: If you’re using ClojureScript, there’s
-<a href="https://github.com/nervous-systems/cljs-lambda/pull/48">pull request</a> with VPC support. Already merged,
-0.6.3-SNAPSHOT published, you can test it.</p>
-<p>Time to learn more about <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html">ENI</a>. It’s a
+<a href=http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html#AvailableIpPerENI>limits per instance</a>.
+I’ve got t1.micro for the benchmark purpose, so, the limit is 2.</p><h3 id=lambda-1>Lambda</h3><p>Lambda function is not able to access VPC resources by default. You have to set at least one subnet
+and at least one security group from the same VPC to allow it to access VPC resources.</p><p>NOTE: If you’re using ClojureScript, there’s
+<a href=https://github.com/nervous-systems/cljs-lambda/pull/48>pull request</a> with VPC support. Already merged,
+0.6.3-SNAPSHOT published, you can test it.</p><p>Time to learn more about <a href=http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html>ENI</a>. It’s a
 virtual network interface attached to EC2 instance in your VPC. ENI can be created, deleted, attached,
 detached, … How does it work with Lambda container? ENI is created (or reused) during lambda/container
 initialisation process. This ENI is used within lambda container to allow it to communicate with your
 instance. Lambda ends, container is suspended, but ENI is still there. ENI is deleted when the lambda
-container is deleted. It takes some time and I want to know when approximately.</p>
-<p>Also think about 350 ENIs limit when you’re designing your infrastructure. If there’s no ENI available,
-lambda ends with internal server error and API Gateway returns 500:</p>
-<blockquote>
-<p>Lambda was not able to create an ENI in the VPC of the Lambda function because the limit
-for Network Interfaces has been reached.</p>
-</blockquote>
-<p>Lambda role must have policy allowing to create ENI, delete ENI, … Do not create your own policies,
-but stick with the service one created and maintained by the AWS guys — <em>AWSLambdaVPCAccessExecutionRole</em>:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+container is deleted. It takes some time and I want to know when approximately.</p><p>Also think about 350 ENIs limit when you’re designing your infrastructure. If there’s no ENI available,
+lambda ends with internal server error and API Gateway returns 500:</p><blockquote><p>Lambda was not able to create an ENI in the VPC of the Lambda function because the limit
+for Network Interfaces has been reached.</p></blockquote><p>Lambda role must have policy allowing to create ENI, delete ENI, … Do not create your own policies,
+but stick with the service one created and maintained by the AWS guys — <em>AWSLambdaVPCAccessExecutionRole</em>:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text>arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
 </code></pre></div><p>BTW I tried to create my own policy. I did forget to add delete interface action and drained ENI pool
-pretty quickly. Managed to create 352 ENIs (limit is 350).</p>
-<h2 id="benchmark">Benchmark</h2>
-<h3 id="methodology">Methodology</h3>
-<p>None. I just wanted to see some numbers and I quickly hacked
-<a href="https://github.com/purposefly/lambda-performance/blob/master/benchmark/benchmark.py">Python script</a>
+pretty quickly. Managed to create 352 ENIs (limit is 350).</p><h2 id=benchmark>Benchmark</h2><h3 id=methodology>Methodology</h3><p>None. I just wanted to see some numbers and I quickly hacked
+<a href=https://github.com/purposefly/lambda-performance/blob/master/benchmark/benchmark.py>Python script</a>
 which sleeps for 0, 5, 10, 15, 30, 60, 300, 600, 900, 1800, 2700 and 3600 seconds. And for every sleep
-cycle:</p>
-<ul>
-<li>Sequentially benchmarks predefined endpoints (<em>/js/128</em>, <em>/js/256</em>, …)</li>
-<li>Fires 30 requests per endpoint via 10 workers (parallel requests)</li>
-<li>Gathers each request-response duration and container reuse info</li>
-</ul>
-<p>It fires 15,120 requests in total and it runs for more than two hours. Sleep is there to approximate
-time when the container is reused and when it isn’t.</p>
-<p>Should be enough to get some data and it also shouldn’t trigger throttling on the AWS side.</p>
-<h3 id="technical">Technical</h3>
-<p>Always run <a href="https://github.com/purposefly/lambda-performance/blob/master/redeploy.sh">redeploy.sh</a>
+cycle:</p><ul><li>Sequentially benchmarks predefined endpoints (<em>/js/128</em>, <em>/js/256</em>, …)</li><li>Fires 30 requests per endpoint via 10 workers (parallel requests)</li><li>Gathers each request-response duration and container reuse info</li></ul><p>It fires 15,120 requests in total and it runs for more than two hours. Sleep is there to approximate
+time when the container is reused and when it isn’t.</p><p>Should be enough to get some data and it also shouldn’t trigger throttling on the AWS side.</p><h3 id=technical>Technical</h3><p>Always run <a href=https://github.com/purposefly/lambda-performance/blob/master/redeploy.sh>redeploy.sh</a>
 script before you run this benchmark. Lambda functions are redeployed and all containers are trashed.
-You can check that the first endpoint requests (up to 10) should return no container reuse.</p>
-<h3 id="output">Output</h3>
-<p>Script generates CSV file with following values:</p>
-<ul>
-<li><em>sleep</em> — in which sleep cycle (group) were requests issued (<em>seconds</em>)</li>
-<li><em>start</em> — exact date and time when the batch of 30 requests was fired (IOW first request start
-date time from the particular batch)</li>
-<li><em>path</em> — API Gateway path</li>
-<li><em>lang</em> — lambda function language (<em>js</em>, <em>python</em>, <em>cljs</em>)</li>
-<li><em>vpc</em> — lambda with VPC? (<em>1</em> yes, <em>0</em> no)</li>
-<li><em>memory</em> — lambda memory size (<em>MB</em>)</li>
-<li><em>workers</em> — number of workers in this batch (parallel requests)</li>
-<li><em>min</em> — fastest request-response time (<em>milliseconds</em>)</li>
-<li><em>max</em> — slowest request-response time (<em>milliseconds</em>)</li>
-<li><em>mean</em> — mean request-response time (<em>milliseconds</em>)</li>
-<li><em>d1, d2, …, d30</em> — first, second, … request-response duration (<em>milliseconds</em>)</li>
-<li><em>r1, r2, …, r30</em> — first, second, … request-response lambda container reuse info
-(<em>1</em> reused, <em>0</em> not reused)</li>
-</ul>
-<h3 id="environment-conditions">Environment conditions</h3>
-<p>No lab, no equal conditions, … Do not compare absolute values. I’m benchmarking it before lunch,
+You can check that the first endpoint requests (up to 10) should return no container reuse.</p><h3 id=output>Output</h3><p>Script generates CSV file with following values:</p><ul><li><em>sleep</em> — in which sleep cycle (group) were requests issued (<em>seconds</em>)</li><li><em>start</em> — exact date and time when the batch of 30 requests was fired (IOW first request start
+date time from the particular batch)</li><li><em>path</em> — API Gateway path</li><li><em>lang</em> — lambda function language (<em>js</em>, <em>python</em>, <em>cljs</em>)</li><li><em>vpc</em> — lambda with VPC? (<em>1</em> yes, <em>0</em> no)</li><li><em>memory</em> — lambda memory size (<em>MB</em>)</li><li><em>workers</em> — number of workers in this batch (parallel requests)</li><li><em>min</em> — fastest request-response time (<em>milliseconds</em>)</li><li><em>max</em> — slowest request-response time (<em>milliseconds</em>)</li><li><em>mean</em> — mean request-response time (<em>milliseconds</em>)</li><li><em>d1, d2, …, d30</em> — first, second, … request-response duration (<em>milliseconds</em>)</li><li><em>r1, r2, …, r30</em> — first, second, … request-response lambda container reuse info
+(<em>1</em> reused, <em>0</em> not reused)</li></ul><h3 id=environment-conditions>Environment conditions</h3><p>No lab, no equal conditions, … Do not compare absolute values. I’m benchmarking it before lunch,
 in the afternoon, during night, … On my VDSL lines, over the air (LTE), at home, at work, … The only
 thing which is constant is region (eu-west-1) and benchmark settings (endpoints, memory sizes, VPC,
-number of requests per endpoint and number of workers).</p>
-<h2 id="analysis">Analysis</h2>
-<p>We’re going to focus on <em>vdsl-home-morning</em> data set for the purpose of this analysis.</p>
-<p>Script fired 15,120 requests. Simple sort in Numbers and we already know that the slowest response took
-13,106ms (13s) and the fastest one 191ms. There’re …</p>
-<ul>
-<li>177 requests (1.2%) slower than 10s</li>
-<li>403 requests (2.7%) slower than 5s</li>
-<li>539 requests (3.6%) slower than 2s</li>
-<li>723 requests (4.8%) slower than 1s</li>
-<li>1,921 requests (8.5%) slower than 0.5s</li>
-</ul>
-<p>Pretty big deviation and kind of disappointment. CSV table, raw data, … all these things are not clear.
-Let’s dive in, use R, plot some charts, check what’s wrong and try to fix it.</p>
-<p>Following part was done with cooperation with
-<a href="https://medium.com/@tomas.bouda">Tomáš Bouda</a>. Our math, stats, … magician. Many thanks Tobbi!</p>
-<h3 id="overview">Overview</h3>
-<p>First thing to check is histogram. It shows that lot of requests are quick, but there’s something
-weird going on around 10 seconds.</p>
-<p><img src="/images/aws/vpc-perf-histogram-of-time.png" alt="Histogram of time"></p>
-<p>Let’s zoom in left side (limit time to 150–500ms) to check typical request duration. It’s somewhere
-in the 200–300ms range. Which is not super quick, but it’s not 10 seconds or more.</p>
-<p><img src="/images/aws/vpc-perf-histogram-of-time-zoomed.png" alt="Zoomed histogram of time"></p>
-<p>Histogram is not going to help us more, we’re going to try box plot. Much better information.</p>
-<p><img src="/images/aws/vpc-perf-boxplot-memory-time.png" alt="Boxplot of memory & time"></p>
-<p>Left half is without VPC. Right half is with VPC. As you can see, we have lot of requests with
-duration greater than 5s. To be more precise, with duration in the 7.5-12.5s range.</p>
-<p>We have lot of input variables and we have to get rid of them. Let’s limit time to 200-500ms in
-this box plot.</p>
-<p><img src="/images/aws/vpc-perf-boxplot-memory-time-limited.png" alt="Limited boxplot of memory & time"></p>
-<p>What does it say? If everything works as expected, there’s no difference between languages
-and memory sizes.</p>
-<p>We can safely ignore language and memory size variables. What do we have now? VPC and lambda
-container reuse variables.</p>
-<h3 id="lambda-containers-reuse">Lambda containers reuse</h3>
-<p>X axis shows when requests were fired and Y axis shows their duration.</p>
-<p><img src="/images/aws/vpc-perf-by-reuse-log-scale.png" alt="By reuse; log-scale"></p>
-<p>First batch has several durations around 10s. That’s “okay”, because lambda functions were redeployed
+number of requests per endpoint and number of workers).</p><h2 id=analysis>Analysis</h2><p>We’re going to focus on <em>vdsl-home-morning</em> data set for the purpose of this analysis.</p><p>Script fired 15,120 requests. Simple sort in Numbers and we already know that the slowest response took
+13,106ms (13s) and the fastest one 191ms. There’re …</p><ul><li>177 requests (1.2%) slower than 10s</li><li>403 requests (2.7%) slower than 5s</li><li>539 requests (3.6%) slower than 2s</li><li>723 requests (4.8%) slower than 1s</li><li>1,921 requests (8.5%) slower than 0.5s</li></ul><p>Pretty big deviation and kind of disappointment. CSV table, raw data, … all these things are not clear.
+Let’s dive in, use R, plot some charts, check what’s wrong and try to fix it.</p><p>Following part was done with cooperation with
+<a href=https://medium.com/@tomas.bouda>Tomáš Bouda</a>. Our math, stats, … magician. Many thanks Tobbi!</p><h3 id=overview>Overview</h3><p>First thing to check is histogram. It shows that lot of requests are quick, but there’s something
+weird going on around 10 seconds.</p><p><img src=/images/aws/vpc-perf-histogram-of-time.png alt="Histogram of time"></p><p>Let’s zoom in left side (limit time to 150–500ms) to check typical request duration. It’s somewhere
+in the 200–300ms range. Which is not super quick, but it’s not 10 seconds or more.</p><p><img src=/images/aws/vpc-perf-histogram-of-time-zoomed.png alt="Zoomed histogram of time"></p><p>Histogram is not going to help us more, we’re going to try box plot. Much better information.</p><p><img src=/images/aws/vpc-perf-boxplot-memory-time.png alt="Boxplot of memory & time"></p><p>Left half is without VPC. Right half is with VPC. As you can see, we have lot of requests with
+duration greater than 5s. To be more precise, with duration in the 7.5-12.5s range.</p><p>We have lot of input variables and we have to get rid of them. Let’s limit time to 200-500ms in
+this box plot.</p><p><img src=/images/aws/vpc-perf-boxplot-memory-time-limited.png alt="Limited boxplot of memory & time"></p><p>What does it say? If everything works as expected, there’s no difference between languages
+and memory sizes.</p><p>We can safely ignore language and memory size variables. What do we have now? VPC and lambda
+container reuse variables.</p><h3 id=lambda-containers-reuse>Lambda containers reuse</h3><p>X axis shows when requests were fired and Y axis shows their duration.</p><p><img src=/images/aws/vpc-perf-by-reuse-log-scale.png alt="By reuse; log-scale"></p><p>First batch has several durations around 10s. That’s “okay”, because lambda functions were redeployed
 before benchmark and there were no containers to reuse. But what we can see is that containers
-weren’t reused about one hour after the benchmark start.</p>
-<p>Let’s find more precise time and use more colours. Sleep time of 900s (15m) looks okay. Sleep time
-of 1800s (30m) doesn’t. We can say that containers are not reused after 15 minutes (rough estimate).</p>
-<p><img src="/images/aws/vpc-perf-by-sleep-log-scale.png" alt="By sleep; log-scale"></p>
-<p>Some numbers and explanation from Tobbi:</p>
-<blockquote>
-<p>To ensure ourselves let’s check the numbers. 2nd and 3rd columns contain sample mean and sample
+weren’t reused about one hour after the benchmark start.</p><p>Let’s find more precise time and use more colours. Sleep time of 900s (15m) looks okay. Sleep time
+of 1800s (30m) doesn’t. We can say that containers are not reused after 15 minutes (rough estimate).</p><p><img src=/images/aws/vpc-perf-by-sleep-log-scale.png alt="By sleep; log-scale"></p><p>Some numbers and explanation from Tobbi:</p><blockquote><p>To ensure ourselves let’s check the numbers. 2nd and 3rd columns contain sample mean and sample
 standard deviation. We can see that most of the means are below 300ms. The bold rows have higher
-means since right-skewed distributions tend to pull mean off.</p>
-<p>4th to 6th columns contain a probability that call remains below given time limit using Gaussian
+means since right-skewed distributions tend to pull mean off.</p><p>4th to 6th columns contain a probability that call remains below given time limit using Gaussian
 distribution, e.g. norm.1000 represents probability the call is below 1000ms. Let’s ignore the
-bold rows since these distributions are bi-modal and not Gaussian.</p>
-<p>The last two columns contain empirical probabilities based on the test data, e.g. emp.500 show
-the probability the call remains under 500ms.</p>
-<p>As we can see, we have pretty reasonable times (below 1 second) for up to 900s gaps.</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th align="right">sleep</th>
-<th align="right">mean</th>
-<th align="right">sd</th>
-<th align="right">norm.500</th>
-<th align="right">norm.1000</th>
-<th align="right">norm.2000</th>
-<th align="right">emp.500</th>
-<th align="right">emp.1000</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="right">    0</td>
-<td align="right">939</td>
-<td align="right">2324</td>
-<td align="right">0.425</td>
-<td align="right">0.510</td>
-<td align="right">0.676</td>
-<td align="right">0.816</td>
-<td align="right">0.906</td>
-</tr>
-<tr>
-<td align="right">5</td>
-<td align="right">282</td>
-<td align="right">69</td>
-<td align="right">0.999</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">0.999</td>
-<td align="right">0.999</td>
-</tr>
-<tr>
-<td align="right">10</td>
-<td align="right">282</td>
-<td align="right">82</td>
-<td align="right">0.996</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">0.991</td>
-<td align="right">0.998</td>
-</tr>
-<tr>
-<td align="right">15</td>
-<td align="right">277</td>
-<td align="right">43</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">0.998</td>
-<td align="right">1.000</td>
-</tr>
-<tr>
-<td align="right">30</td>
-<td align="right">283</td>
-<td align="right">74</td>
-<td align="right">0.998</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">0.990</td>
-<td align="right">0.998</td>
-</tr>
-<tr>
-<td align="right">60</td>
-<td align="right">275</td>
-<td align="right">38</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-</tr>
-<tr>
-<td align="right">300</td>
-<td align="right">287</td>
-<td align="right">123</td>
-<td align="right">0.957</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">0.985</td>
-<td align="right">0.998</td>
-</tr>
-<tr>
-<td align="right">600</td>
-<td align="right">293</td>
-<td align="right">204</td>
-<td align="right">0.843</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">0.960</td>
-<td align="right">0.991</td>
-</tr>
-<tr>
-<td align="right">900</td>
-<td align="right">294</td>
-<td align="right">153</td>
-<td align="right">0.909</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">0.933</td>
-<td align="right">0.994</td>
-</tr>
-<tr>
-<td align="right">1800</td>
-<td align="right">618</td>
-<td align="right">1757</td>
-<td align="right">0.473</td>
-<td align="right">0.586</td>
-<td align="right">0.784</td>
-<td align="right">0.867</td>
-<td align="right">0.960</td>
-</tr>
-<tr>
-<td align="right">2700</td>
-<td align="right">1423</td>
-<td align="right">2945</td>
-<td align="right">0.377</td>
-<td align="right">0.443</td>
-<td align="right">0.578</td>
-<td align="right">0.756</td>
-<td align="right">0.832</td>
-</tr>
-<tr>
-<td align="right">3600</td>
-<td align="right">1652</td>
-<td align="right">3089</td>
-<td align="right">0.355</td>
-<td align="right">0.416</td>
-<td align="right">0.545</td>
-<td align="right">0.679</td>
-<td align="right">0.751</td>
-</tr>
-</tbody>
-</table>
-<h3 id="vpc-1">VPC</h3>
-<p>Last thing we have to find is how VPC configuration influences all these durations. We’re lucky with
-another box plot.</p>
-<p><img src="/images/aws/vpc-perf-boxplot-reuse-vpc-time.png" alt="Boxplot: reuse * vpc ~ time"></p>
-<p>X axis shows if the lambda container was (1) or wasn’t (0) reused. Y axis shows the request duration.</p>
-<p>There’s no difference if container is reused. VPC can be set or not. Huge difference is when the container
-is not reused.</p>
-<p>We can say that these unacceptable durations come from lambda functions with VPC when their containers
-are not reused.</p>
-<h3 id="keep-alive-containers">Keep alive containers</h3>
-<p>We already found that these containers are not reused after ~15 minutes. I tried to keep them alive with
+bold rows since these distributions are bi-modal and not Gaussian.</p><p>The last two columns contain empirical probabilities based on the test data, e.g. emp.500 show
+the probability the call remains under 500ms.</p><p>As we can see, we have pretty reasonable times (below 1 second) for up to 900s gaps.</p></blockquote><table><thead><tr><th align=right>sleep</th><th align=right>mean</th><th align=right>sd</th><th align=right>norm.500</th><th align=right>norm.1000</th><th align=right>norm.2000</th><th align=right>emp.500</th><th align=right>emp.1000</th></tr></thead><tbody><tr><td align=right>  0</td><td align=right>939</td><td align=right>2324</td><td align=right>0.425</td><td align=right>0.510</td><td align=right>0.676</td><td align=right>0.816</td><td align=right>0.906</td></tr><tr><td align=right>5</td><td align=right>282</td><td align=right>69</td><td align=right>0.999</td><td align=right>1.000</td><td align=right>1.000</td><td align=right>0.999</td><td align=right>0.999</td></tr><tr><td align=right>10</td><td align=right>282</td><td align=right>82</td><td align=right>0.996</td><td align=right>1.000</td><td align=right>1.000</td><td align=right>0.991</td><td align=right>0.998</td></tr><tr><td align=right>15</td><td align=right>277</td><td align=right>43</td><td align=right>1.000</td><td align=right>1.000</td><td align=right>1.000</td><td align=right>0.998</td><td align=right>1.000</td></tr><tr><td align=right>30</td><td align=right>283</td><td align=right>74</td><td align=right>0.998</td><td align=right>1.000</td><td align=right>1.000</td><td align=right>0.990</td><td align=right>0.998</td></tr><tr><td align=right>60</td><td align=right>275</td><td align=right>38</td><td align=right>1.000</td><td align=right>1.000</td><td align=right>1.000</td><td align=right>1.000</td><td align=right>1.000</td></tr><tr><td align=right>300</td><td align=right>287</td><td align=right>123</td><td align=right>0.957</td><td align=right>1.000</td><td align=right>1.000</td><td align=right>0.985</td><td align=right>0.998</td></tr><tr><td align=right>600</td><td align=right>293</td><td align=right>204</td><td align=right>0.843</td><td align=right>1.000</td><td align=right>1.000</td><td align=right>0.960</td><td align=right>0.991</td></tr><tr><td align=right>900</td><td align=right>294</td><td align=right>153</td><td align=right>0.909</td><td align=right>1.000</td><td align=right>1.000</td><td align=right>0.933</td><td align=right>0.994</td></tr><tr><td align=right>1800</td><td align=right>618</td><td align=right>1757</td><td align=right>0.473</td><td align=right>0.586</td><td align=right>0.784</td><td align=right>0.867</td><td align=right>0.960</td></tr><tr><td align=right>2700</td><td align=right>1423</td><td align=right>2945</td><td align=right>0.377</td><td align=right>0.443</td><td align=right>0.578</td><td align=right>0.756</td><td align=right>0.832</td></tr><tr><td align=right>3600</td><td align=right>1652</td><td align=right>3089</td><td align=right>0.355</td><td align=right>0.416</td><td align=right>0.545</td><td align=right>0.679</td><td align=right>0.751</td></tr></tbody></table><h3 id=vpc-1>VPC</h3><p>Last thing we have to find is how VPC configuration influences all these durations. We’re lucky with
+another box plot.</p><p><img src=/images/aws/vpc-perf-boxplot-reuse-vpc-time.png alt="Boxplot: reuse * vpc ~ time"></p><p>X axis shows if the lambda container was (1) or wasn’t (0) reused. Y axis shows the request duration.</p><p>There’s no difference if container is reused. VPC can be set or not. Huge difference is when the container
+is not reused.</p><p>We can say that these unacceptable durations come from lambda functions with VPC when their containers
+are not reused.</p><h3 id=keep-alive-containers>Keep alive containers</h3><p>We already found that these containers are not reused after ~15 minutes. I tried to keep them alive with
 quickly hacked
-<a href="https://github.com/purposefly/lambda-performance/blob/master/benchmark/keep_alive.py">keep alive</a> script.</p>
-<p>This script fires 10 requests with 10 workers per endpoint to keep alive 10 containers. That’s because our
-benchmark script also do use 10 workers. These requests are fired in 15 minutes interval. What happened?</p>
-<p><img src="/images/aws/vpc-perf-boxplot-reuse-vpc-time-keepalive.png" alt="Boxplot: reuse * vpc ~ time with keepalive"></p>
-<p>Third data set (<em>ka-15-r-10-vdsl-home-afternoon</em>, keep alive time interval 15m, 10 containers) has one
-duration just below 5s and rest is in the 0-2.5s range.</p>
-<p>Let’s look at the <em>ka-15-r-10-vdsl-home-afternoon</em> data set directly.</p>
-<p><img src="/images/aws/vpc-perf-by-reuse-log-scale-keepalive.png" alt="Bby reuse; log-scale; keepalive"></p>
-<p>Huge improvement. 10s requests are gone. Compare against <em>vdsl-home-morning</em> data set.</p>
-<p><img src="/images/aws/vpc-perf-by-reuse-log-scale.png" alt="By reuse; log-scale"></p>
-<p>We can say victory 😉 Not victory actually, but huge progress at least.</p>
-<h2 id="conclusion">Conclusion</h2>
-<p>Be aware that our testing lambda functions are very simple. They just returns lambda container reuse info.
-These numbers and findings can differ if your lambda has lot of dependencies, does lot of other things, etc.</p>
-<p>Based on these facts, we can say that:</p>
-<ul>
-<li>Lambda function language (Python, ClojureScript or JavaScript) has no influence on lambda container
-initialisation time</li>
-<li>Memory size has no influence on lambda container initialisation time</li>
-<li>VPC has huge impact on lambda container initialisation time when the lambda container is not reused,
-but have no impact at all (or negligible) when the lambda container is reused</li>
-<li>Lambda containers are not reused after ~15 minutes</li>
-<li>If we issue keep alive requests in the 15 minutes interval, very long request durations (&gt; 5s) are rare</li>
-</ul>
-<p>Recommendation?</p>
-<p>Use <a href="https://aws.amazon.com/cloudwatch/">CloudWatch</a> to issue keep alive functions in the 15 minutes
-interval if you’re using VPC, API Gateway &amp; Lambda functions.</p>
-<p>UPDATE: Configurable keep alive function in Python, CloudWatch event rule and CloudFormation template can be found <a href="https://gist.github.com/zrzka/47c224effa76d45135b1790a7d063c04">here</a>.</p>
-<p>This will not solve your issue completely, but will help a lot. Especially if your lambda function is rarely
+<a href=https://github.com/purposefly/lambda-performance/blob/master/benchmark/keep_alive.py>keep alive</a> script.</p><p>This script fires 10 requests with 10 workers per endpoint to keep alive 10 containers. That’s because our
+benchmark script also do use 10 workers. These requests are fired in 15 minutes interval. What happened?</p><p><img src=/images/aws/vpc-perf-boxplot-reuse-vpc-time-keepalive.png alt="Boxplot: reuse * vpc ~ time with keepalive"></p><p>Third data set (<em>ka-15-r-10-vdsl-home-afternoon</em>, keep alive time interval 15m, 10 containers) has one
+duration just below 5s and rest is in the 0-2.5s range.</p><p>Let’s look at the <em>ka-15-r-10-vdsl-home-afternoon</em> data set directly.</p><p><img src=/images/aws/vpc-perf-by-reuse-log-scale-keepalive.png alt="Bby reuse; log-scale; keepalive"></p><p>Huge improvement. 10s requests are gone. Compare against <em>vdsl-home-morning</em> data set.</p><p><img src=/images/aws/vpc-perf-by-reuse-log-scale.png alt="By reuse; log-scale"></p><p>We can say victory 😉 Not victory actually, but huge progress at least.</p><h2 id=conclusion>Conclusion</h2><p>Be aware that our testing lambda functions are very simple. They just returns lambda container reuse info.
+These numbers and findings can differ if your lambda has lot of dependencies, does lot of other things, etc.</p><p>Based on these facts, we can say that:</p><ul><li>Lambda function language (Python, ClojureScript or JavaScript) has no influence on lambda container
+initialisation time</li><li>Memory size has no influence on lambda container initialisation time</li><li>VPC has huge impact on lambda container initialisation time when the lambda container is not reused,
+but have no impact at all (or negligible) when the lambda container is reused</li><li>Lambda containers are not reused after ~15 minutes</li><li>If we issue keep alive requests in the 15 minutes interval, very long request durations (> 5s) are rare</li></ul><p>Recommendation?</p><p>Use <a href=https://aws.amazon.com/cloudwatch/>CloudWatch</a> to issue keep alive functions in the 15 minutes
+interval if you’re using VPC, API Gateway & Lambda functions.</p><p>UPDATE: Configurable keep alive function in Python, CloudWatch event rule and CloudFormation template can be found <a href=https://gist.github.com/zrzka/47c224effa76d45135b1790a7d063c04>here</a>.</p><p>This will not solve your issue completely, but will help a lot. Especially if your lambda function is rarely
 used and containers are not reused. It’s a nightmare to explain to your user that he has to wait for 15s to
-get some response from your application.</p>
-<p>Not sure if AWS guys will be happy, but what else can we do?</p>
-<p>Do you want to play with this benchmark, roll your own analysis, …? Here’s the
-<a href="https://github.com/purposefly/lambda-performance">repository link</a> with all lambda functions, scripts,
-data sets and HTML outputs.</p>
-
-  </section>
-</article>
-
-</main>
-
-</div>
-
-<footer>
-    <div class="container">
-        <span class="copyright">&copy; 2019 Robert Vojta (𝒵𝓇𝓏𝓀𝒶) - <a rel="license"
-                href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></span>
-    </div>
-</footer>
-
-</body>
-
-</html>
+get some response from your application.</p><p>Not sure if AWS guys will be happy, but what else can we do?</p><p>Do you want to play with this benchmark, roll your own analysis, …? Here’s the
+<a href=https://github.com/purposefly/lambda-performance>repository link</a> with all lambda functions, scripts,
+data sets and HTML outputs.</p></section></article></main></div><footer><div class=container><span class=copyright>&copy; 2019 Robert Vojta (𝒵𝓇𝓏𝓀𝒶) - <a rel=license href=https://creativecommons.org/licenses/by-sa/4.0/>CC BY-SA 4.0</a></span></div></footer></body></html>

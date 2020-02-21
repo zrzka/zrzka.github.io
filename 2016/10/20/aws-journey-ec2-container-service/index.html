@@ -1,94 +1,33 @@
-<!DOCTYPE html>
-<html lang="en-us">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="description"
-        content="">
-    <meta name="generator" content="Hugo 0.65.0" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/style.css" type="text/css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type="text/css">
-    <link rel="alternate" href="/index.xml" type="application/rss+xml" title="Robert Vojta (𝒵𝓇𝓏𝓀𝒶)">
-    <title>AWS journey — EC2 Container Service - Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title>
-</head>
-
-<body>
-
-    <header>
-        <div class="container clearfix">
-            <a class="path" href="https://www.zrzka.dev/">Home</a>
-            <span class="caret">% _</span>
-            <div class="right">
-                
-                
-                <a class="path" href="/about/">About</a>
-                
-                |
-                <a class="path" href="/site/">Site</a>
-                
-            </div>
-        </div>
-    </header>
-
-    <div class="container">
-
-<main role="main" class="article">
-  
-<article class="single" itemscope itemtype="http://schema.org/BlogPosting">
-  <div class="meta">
-
-    <span class="key">published on</span>
-    <span class="val"><time itemprop="datePublished" datetime="2016-10-20">October 20, 2016</time></span>
-
-
-    <span class="key">in</span>
-    <span class="val">
-
-        <a href="/categories/articles">articles</a>
-
-    </span>
-
-
-    <br>
-    <span class="key">tags:</span>
-    <span class="val">
-
-        <a href="/tags/aws">aws</a>
-
-        <a href="/tags/ec2">ec2</a>
-
-    </span>
-
-  </div>
-  <h1 class="headline" itemprop="headline">AWS journey — EC2 Container Service</h1>
-  <section class="body" itemprop="articleBody">
-    <p>We were using (and we’re still it using for some services) Docker Cloud. Main problem with DC is that
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=description content><meta name=generator content="Hugo 0.64.1"><meta name=viewport content="width=device-width,initial-scale=1"><link rel=stylesheet href=/css/style.css type=text/css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type=text/css><link rel=alternate href=/index.xml type=application/rss+xml title="Robert Vojta (𝒵𝓇𝓏𝓀𝒶)"><title>AWS journey — EC2 Container Service - Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title></head><body><header><div class="container clearfix"><a class=path href=https://www.zrzka.dev/>Home</a>
+<span class=caret>% _</span><div class=right><a class=path href=/about/>About</a>
+|
+<a class=path href=/site/>Site</a></div></div></header><div class=container><main role=main class=article><article class=single itemscope itemtype=http://schema.org/BlogPosting><div class=meta><span class=key>published on</span>
+<span class=val><time itemprop=datePublished datetime=2016-10-20>October 20, 2016</time></span>
+<span class=key>in</span>
+<span class=val><a href=/categories/articles>articles</a></span><br><span class=key>tags:</span>
+<span class=val><a href=/tags/aws>aws</a>
+<a href=/tags/ec2>ec2</a></span></div><h1 class=headline itemprop=headline>AWS journey — EC2 Container Service</h1><section class=body itemprop=articleBody><p>We were using (and we’re still it using for some services) Docker Cloud. Main problem with DC is that
 they can’t handle private subnets. EC2 instance must be in the public subnet and that’s not what we want.
 Hooray (irony), we have to switch to the EC2 Container Service. Try to explain this to our business
-department. Additional time for infrastructure. Can handle it, but it’s tough sometimes.</p>
-<h2 id="docker-images-repository">Docker images repository</h2>
-<h3 id="cloud-formation-template">Cloud Formation Template</h3>
-<p>This step is optional, but we’re trying to leverage as many as possible AWS services. You need a repository
-for your Docker images. And because I like Cloud Formation, here’s the template:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json"><span style="color:#e6db74">&#34;AthenaRepository&#34;</span><span style="color:#960050;background-color:#1e0010">:</span> {
-  <span style="color:#f92672">&#34;Type&#34;</span>: <span style="color:#e6db74">&#34;AWS::ECR::Repository&#34;</span>,
-  <span style="color:#f92672">&#34;Condition&#34;</span>: <span style="color:#e6db74">&#34;DevelopmentEnv&#34;</span>,
-  <span style="color:#f92672">&#34;Properties&#34;</span>: {
-    <span style="color:#f92672">&#34;RepositoryName&#34;</span> : <span style="color:#e6db74">&#34;athena&#34;</span>,
-    <span style="color:#f92672">&#34;RepositoryPolicyText&#34;</span> : {
-      <span style="color:#f92672">&#34;Version&#34;</span>: <span style="color:#e6db74">&#34;2008-10-17&#34;</span>,
-      <span style="color:#f92672">&#34;Statement&#34;</span>: [
+department. Additional time for infrastructure. Can handle it, but it’s tough sometimes.</p><h2 id=docker-images-repository>Docker images repository</h2><h3 id=cloud-formation-template>Cloud Formation Template</h3><p>This step is optional, but we’re trying to leverage as many as possible AWS services. You need a repository
+for your Docker images. And because I like Cloud Formation, here’s the template:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=color:#e6db74>&#34;AthenaRepository&#34;</span><span style=color:#960050;background-color:#1e0010>:</span> {
+  <span style=color:#f92672>&#34;Type&#34;</span>: <span style=color:#e6db74>&#34;AWS::ECR::Repository&#34;</span>,
+  <span style=color:#f92672>&#34;Condition&#34;</span>: <span style=color:#e6db74>&#34;DevelopmentEnv&#34;</span>,
+  <span style=color:#f92672>&#34;Properties&#34;</span>: {
+    <span style=color:#f92672>&#34;RepositoryName&#34;</span> : <span style=color:#e6db74>&#34;athena&#34;</span>,
+    <span style=color:#f92672>&#34;RepositoryPolicyText&#34;</span> : {
+      <span style=color:#f92672>&#34;Version&#34;</span>: <span style=color:#e6db74>&#34;2008-10-17&#34;</span>,
+      <span style=color:#f92672>&#34;Statement&#34;</span>: [
         {
-          <span style="color:#f92672">&#34;Sid&#34;</span>: <span style="color:#e6db74">&#34;ProductionAccountPullAccess&#34;</span>,
-          <span style="color:#f92672">&#34;Effect&#34;</span>: <span style="color:#e6db74">&#34;Allow&#34;</span>,
-          <span style="color:#f92672">&#34;Principal&#34;</span>: {
-            <span style="color:#f92672">&#34;AWS&#34;</span>: <span style="color:#e6db74">&#34;arn:aws:iam::$ANOTHER-ACCOUNT-ID:root&#34;</span>
+          <span style=color:#f92672>&#34;Sid&#34;</span>: <span style=color:#e6db74>&#34;ProductionAccountPullAccess&#34;</span>,
+          <span style=color:#f92672>&#34;Effect&#34;</span>: <span style=color:#e6db74>&#34;Allow&#34;</span>,
+          <span style=color:#f92672>&#34;Principal&#34;</span>: {
+            <span style=color:#f92672>&#34;AWS&#34;</span>: <span style=color:#e6db74>&#34;arn:aws:iam::$ANOTHER-ACCOUNT-ID:root&#34;</span>
           },
-          <span style="color:#f92672">&#34;Action&#34;</span>: [
-            <span style="color:#e6db74">&#34;ecr:GetDownloadUrlForLayer&#34;</span>,
-            <span style="color:#e6db74">&#34;ecr:BatchGetImage&#34;</span>,
-            <span style="color:#e6db74">&#34;ecr:BatchCheckLayerAvailability&#34;</span>
+          <span style=color:#f92672>&#34;Action&#34;</span>: [
+            <span style=color:#e6db74>&#34;ecr:GetDownloadUrlForLayer&#34;</span>,
+            <span style=color:#e6db74>&#34;ecr:BatchGetImage&#34;</span>,
+            <span style=color:#e6db74>&#34;ecr:BatchCheckLayerAvailability&#34;</span>
           ]
         }
       ]
@@ -96,187 +35,136 @@ for your Docker images. And because I like Cloud Formation, here’s the templat
   }
 }
 </code></pre></div><p>Why <em>RepositoryPolicyText</em>? We have several AWS accounts, but we want just one repository.
-This policy gives pull access to <em>$ANOTHER-ACCOUNT-ID</em> account.</p>
-<p>Why <em>DevelopmentEnv</em> condition? Same reason, just one repo per several AWS accounts. We do use same
-templates for all accounts. They’re parametrised.</p>
-<h3 id="push-images">Push images</h3>
-<p>There’s nothing new. Just replace <em>docker login …</em> with
-<a href="http://docs.aws.amazon.com/cli/latest/reference/ecr/get-login.html"><em>$(aws ecr get-login)</em></a>.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#66d9ef">$(</span>aws ecr get-login<span style="color:#66d9ef">)</span>
+This policy gives pull access to <em>$ANOTHER-ACCOUNT-ID</em> account.</p><p>Why <em>DevelopmentEnv</em> condition? Same reason, just one repo per several AWS accounts. We do use same
+templates for all accounts. They’re parametrised.</p><h3 id=push-images>Push images</h3><p>There’s nothing new. Just replace <em>docker login …</em> with
+<a href=http://docs.aws.amazon.com/cli/latest/reference/ecr/get-login.html><em>$(aws ecr get-login)</em></a>.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=color:#66d9ef>$(</span>aws ecr get-login<span style=color:#66d9ef>)</span>
 docker build -t athena .
 docker tag athena $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/athena:build-$TRAVIS_BUILD_NUMBER
 docker push $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/athena:build-$TRAVIS_BUILD_NUMBER&lt;/pre&gt;
-</code></pre></div><h2 id="ec2-instance">EC2 instance</h2>
-<h3 id="cluster">Cluster</h3>
-<p>First of all, you need cluster. There’s no way how to deploy your services without it. Cloud Formation
-template:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json"><span style="color:#e6db74">&#34;ECSCluster&#34;</span> <span style="color:#960050;background-color:#1e0010">:</span> {
-  <span style="color:#f92672">&#34;Type&#34;</span> : <span style="color:#e6db74">&#34;AWS::ECS::Cluster&#34;</span>,
-  <span style="color:#f92672">&#34;Properties&#34;</span> : {
-    <span style="color:#f92672">&#34;ClusterName&#34;</span> : <span style="color:#e6db74">&#34;Athena&#34;</span>
+</code></pre></div><h2 id=ec2-instance>EC2 instance</h2><h3 id=cluster>Cluster</h3><p>First of all, you need cluster. There’s no way how to deploy your services without it. Cloud Formation
+template:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=color:#e6db74>&#34;ECSCluster&#34;</span> <span style=color:#960050;background-color:#1e0010>:</span> {
+  <span style=color:#f92672>&#34;Type&#34;</span> : <span style=color:#e6db74>&#34;AWS::ECS::Cluster&#34;</span>,
+  <span style=color:#f92672>&#34;Properties&#34;</span> : {
+    <span style=color:#f92672>&#34;ClusterName&#34;</span> : <span style=color:#e6db74>&#34;Athena&#34;</span>
   }
-</code></pre></div><p>Now we have <em>Athena</em> cluster. But it doesn’t contain EC2 instance(s). How to assign them? Fun is coming.</p>
-<h3 id="role">Role</h3>
-<p>We have to set EC2 instance profile, which can contain roles. And one of our roles must allow communication
-with EC2 Container Service.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json"><span style="color:#e6db74">&#34;ECSRolePolicy&#34;</span><span style="color:#960050;background-color:#1e0010">:</span> {
-  <span style="color:#f92672">&#34;Type&#34;</span>: <span style="color:#e6db74">&#34;AWS::IAM::ManagedPolicy&#34;</span>,
-  <span style="color:#f92672">&#34;Properties&#34;</span>: {
-    <span style="color:#f92672">&#34;PolicyDocument&#34;</span>: {
-      <span style="color:#f92672">&#34;Version&#34;</span>: <span style="color:#e6db74">&#34;2012-10-17&#34;</span>,
-      <span style="color:#f92672">&#34;Statement&#34;</span>: [
+</code></pre></div><p>Now we have <em>Athena</em> cluster. But it doesn’t contain EC2 instance(s). How to assign them? Fun is coming.</p><h3 id=role>Role</h3><p>We have to set EC2 instance profile, which can contain roles. And one of our roles must allow communication
+with EC2 Container Service.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=color:#e6db74>&#34;ECSRolePolicy&#34;</span><span style=color:#960050;background-color:#1e0010>:</span> {
+  <span style=color:#f92672>&#34;Type&#34;</span>: <span style=color:#e6db74>&#34;AWS::IAM::ManagedPolicy&#34;</span>,
+  <span style=color:#f92672>&#34;Properties&#34;</span>: {
+    <span style=color:#f92672>&#34;PolicyDocument&#34;</span>: {
+      <span style=color:#f92672>&#34;Version&#34;</span>: <span style=color:#e6db74>&#34;2012-10-17&#34;</span>,
+      <span style=color:#f92672>&#34;Statement&#34;</span>: [
         {
-          <span style="color:#f92672">&#34;Effect&#34;</span>: <span style="color:#e6db74">&#34;Allow&#34;</span>,
-          <span style="color:#f92672">&#34;Action&#34;</span>: [
-            <span style="color:#e6db74">&#34;ecr:BatchCheckLayerAvailability&#34;</span>,
-            <span style="color:#e6db74">&#34;ecr:BatchGetImage&#34;</span>,
-            <span style="color:#e6db74">&#34;ecr:DescribeRepositories&#34;</span>,
-            <span style="color:#e6db74">&#34;ecr:GetAuthorizationToken&#34;</span>,
-            <span style="color:#e6db74">&#34;ecr:GetDownloadUrlForLayer&#34;</span>,
-            <span style="color:#e6db74">&#34;ecr:GetRepositoryPolicy&#34;</span>,
-            <span style="color:#e6db74">&#34;ecr:ListImages&#34;</span>,
-            <span style="color:#e6db74">&#34;ecs:CreateCluster&#34;</span>,
-            <span style="color:#e6db74">&#34;ecs:DeregisterContainerInstance&#34;</span>,
-            <span style="color:#e6db74">&#34;ecs:DiscoverPollEndpoint&#34;</span>,
-            <span style="color:#e6db74">&#34;ecs:Poll&#34;</span>,
-            <span style="color:#e6db74">&#34;ecs:RegisterContainerInstance&#34;</span>,
-            <span style="color:#e6db74">&#34;ecs:StartTask&#34;</span>,
-            <span style="color:#e6db74">&#34;ecs:StartTelemetrySession&#34;</span>,
-            <span style="color:#e6db74">&#34;ecs:SubmitContainerStateChange&#34;</span>,
-            <span style="color:#e6db74">&#34;ecs:SubmitTaskStateChange&#34;</span>
+          <span style=color:#f92672>&#34;Effect&#34;</span>: <span style=color:#e6db74>&#34;Allow&#34;</span>,
+          <span style=color:#f92672>&#34;Action&#34;</span>: [
+            <span style=color:#e6db74>&#34;ecr:BatchCheckLayerAvailability&#34;</span>,
+            <span style=color:#e6db74>&#34;ecr:BatchGetImage&#34;</span>,
+            <span style=color:#e6db74>&#34;ecr:DescribeRepositories&#34;</span>,
+            <span style=color:#e6db74>&#34;ecr:GetAuthorizationToken&#34;</span>,
+            <span style=color:#e6db74>&#34;ecr:GetDownloadUrlForLayer&#34;</span>,
+            <span style=color:#e6db74>&#34;ecr:GetRepositoryPolicy&#34;</span>,
+            <span style=color:#e6db74>&#34;ecr:ListImages&#34;</span>,
+            <span style=color:#e6db74>&#34;ecs:CreateCluster&#34;</span>,
+            <span style=color:#e6db74>&#34;ecs:DeregisterContainerInstance&#34;</span>,
+            <span style=color:#e6db74>&#34;ecs:DiscoverPollEndpoint&#34;</span>,
+            <span style=color:#e6db74>&#34;ecs:Poll&#34;</span>,
+            <span style=color:#e6db74>&#34;ecs:RegisterContainerInstance&#34;</span>,
+            <span style=color:#e6db74>&#34;ecs:StartTask&#34;</span>,
+            <span style=color:#e6db74>&#34;ecs:StartTelemetrySession&#34;</span>,
+            <span style=color:#e6db74>&#34;ecs:SubmitContainerStateChange&#34;</span>,
+            <span style=color:#e6db74>&#34;ecs:SubmitTaskStateChange&#34;</span>
           ],
-          <span style="color:#f92672">&#34;Resource&#34;</span>: [
-            <span style="color:#e6db74">&#34;*&#34;</span>
+          <span style=color:#f92672>&#34;Resource&#34;</span>: [
+            <span style=color:#e6db74>&#34;*&#34;</span>
           ]
         }
       ]
     }
   }
-}<span style="color:#960050;background-color:#1e0010">,</span>
-<span style="color:#e6db74">&#34;ECSRole&#34;</span><span style="color:#960050;background-color:#1e0010">:</span> {
-  <span style="color:#f92672">&#34;Type&#34;</span>: <span style="color:#e6db74">&#34;AWS::IAM::Role&#34;</span>,
-  <span style="color:#f92672">&#34;Properties&#34;</span>: {
-    <span style="color:#f92672">&#34;ManagedPolicyArns&#34;</span>: [
-      { <span style="color:#f92672">&#34;Ref&#34;</span>: <span style="color:#e6db74">&#34;ECSRolePolicy&#34;</span> }
+}<span style=color:#960050;background-color:#1e0010>,</span>
+<span style=color:#e6db74>&#34;ECSRole&#34;</span><span style=color:#960050;background-color:#1e0010>:</span> {
+  <span style=color:#f92672>&#34;Type&#34;</span>: <span style=color:#e6db74>&#34;AWS::IAM::Role&#34;</span>,
+  <span style=color:#f92672>&#34;Properties&#34;</span>: {
+    <span style=color:#f92672>&#34;ManagedPolicyArns&#34;</span>: [
+      { <span style=color:#f92672>&#34;Ref&#34;</span>: <span style=color:#e6db74>&#34;ECSRolePolicy&#34;</span> }
     ],
-    <span style="color:#f92672">&#34;AssumeRolePolicyDocument&#34;</span>: {
-      <span style="color:#f92672">&#34;Version&#34;</span>: <span style="color:#e6db74">&#34;2012-10-17&#34;</span>,
-      <span style="color:#f92672">&#34;Statement&#34;</span>: [
+    <span style=color:#f92672>&#34;AssumeRolePolicyDocument&#34;</span>: {
+      <span style=color:#f92672>&#34;Version&#34;</span>: <span style=color:#e6db74>&#34;2012-10-17&#34;</span>,
+      <span style=color:#f92672>&#34;Statement&#34;</span>: [
         {
-          <span style="color:#f92672">&#34;Effect&#34;</span>: <span style="color:#e6db74">&#34;Allow&#34;</span>,
-          <span style="color:#f92672">&#34;Principal&#34;</span>: {
-            <span style="color:#f92672">&#34;Service&#34;</span>: <span style="color:#e6db74">&#34;ec2.amazonaws.com&#34;</span>
+          <span style=color:#f92672>&#34;Effect&#34;</span>: <span style=color:#e6db74>&#34;Allow&#34;</span>,
+          <span style=color:#f92672>&#34;Principal&#34;</span>: {
+            <span style=color:#f92672>&#34;Service&#34;</span>: <span style=color:#e6db74>&#34;ec2.amazonaws.com&#34;</span>
           },
-          <span style="color:#f92672">&#34;Action&#34;</span>: <span style="color:#e6db74">&#34;sts:AssumeRole&#34;</span>
+          <span style=color:#f92672>&#34;Action&#34;</span>: <span style=color:#e6db74>&#34;sts:AssumeRole&#34;</span>
         }
       ]
     }
   }
-}<span style="color:#960050;background-color:#1e0010">,</span>
-<span style="color:#e6db74">&#34;InstanceProfile&#34;</span> <span style="color:#960050;background-color:#1e0010">:</span> {
-  <span style="color:#f92672">&#34;Type&#34;</span> : <span style="color:#e6db74">&#34;AWS::IAM::InstanceProfile&#34;</span>,
-  <span style="color:#f92672">&#34;Properties&#34;</span> : {
-    <span style="color:#f92672">&#34;Path&#34;</span> : <span style="color:#e6db74">&#34;/&#34;</span>,
-    <span style="color:#f92672">&#34;Roles&#34;</span> : [ { <span style="color:#f92672">&#34;Ref&#34;</span>: <span style="color:#e6db74">&#34;ECSRole&#34;</span> } ]
+}<span style=color:#960050;background-color:#1e0010>,</span>
+<span style=color:#e6db74>&#34;InstanceProfile&#34;</span> <span style=color:#960050;background-color:#1e0010>:</span> {
+  <span style=color:#f92672>&#34;Type&#34;</span> : <span style=color:#e6db74>&#34;AWS::IAM::InstanceProfile&#34;</span>,
+  <span style=color:#f92672>&#34;Properties&#34;</span> : {
+    <span style=color:#f92672>&#34;Path&#34;</span> : <span style=color:#e6db74>&#34;/&#34;</span>,
+    <span style=color:#f92672>&#34;Roles&#34;</span> : [ { <span style=color:#f92672>&#34;Ref&#34;</span>: <span style=color:#e6db74>&#34;ECSRole&#34;</span> } ]
   }
 }
-</code></pre></div><p>We can assign it in this way:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json"><span style="color:#e6db74">&#34;Athena&#34;</span><span style="color:#960050;background-color:#1e0010">:</span> {
-  <span style="color:#f92672">&#34;Type&#34;</span>: <span style="color:#e6db74">&#34;AWS::EC2::Instance&#34;</span>,
-  <span style="color:#f92672">&#34;Properties&#34;</span>: {
-    <span style="color:#960050;background-color:#1e0010">...</span>
-    <span style="color:#f92672">&#34;IamInstanceProfile&#34;</span> : {<span style="color:#f92672">&#34;Ref&#34;</span> : <span style="color:#e6db74">&#34;InstanceProfile&#34;</span>},
-    <span style="color:#960050;background-color:#1e0010">...</span>
-</code></pre></div><h3 id="ecs-configuration">ECS configuration</h3>
-<p>Still not done. EC2 instance must know the cluster name. Here we can leverage <em>UserData</em> property:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json"><span style="color:#e6db74">&#34;Athena&#34;</span><span style="color:#960050;background-color:#1e0010">:</span> {
-  <span style="color:#f92672">&#34;Type&#34;</span>: <span style="color:#e6db74">&#34;AWS::EC2::Instance&#34;</span>,
-  <span style="color:#f92672">&#34;Properties&#34;</span>: {
-    <span style="color:#960050;background-color:#1e0010">...</span>
-    <span style="color:#f92672">&#34;UserData&#34;</span>: { <span style="color:#f92672">&#34;Fn::Base64&#34;</span>: { <span style="color:#f92672">&#34;Fn::Join&#34;</span> : [ <span style="color:#e6db74">&#34;n&#34;</span>, [
-      <span style="color:#e6db74">&#34;#cloud-config&#34;</span>,
-      <span style="color:#e6db74">&#34;repo_update: true&#34;</span>,
-      <span style="color:#e6db74">&#34;repo_upgrade: all&#34;</span>,
-      <span style="color:#e6db74">&#34;package_upgrade: true&#34;</span>,
-      <span style="color:#e6db74">&#34;packages:&#34;</span>,
-      <span style="color:#e6db74">&#34; - aws-cli&#34;</span>,
-      <span style="color:#e6db74">&#34; - ecs-init&#34;</span>,
-      <span style="color:#e6db74">&#34;runcmd:&#34;</span>,
-      { <span style="color:#f92672">&#34;Fn::Join&#34;</span> : [ <span style="color:#e6db74">&#34;&#34;</span>, [
-        <span style="color:#e6db74">&#34; - echo ECS_CLUSTER=&#34;</span>,
-        { <span style="color:#f92672">&#34;Ref&#34;</span>: <span style="color:#e6db74">&#34;ECSCluster&#34;</span> },
-        <span style="color:#e6db74">&#34; &amp;gt;&amp;gt; /etc/ecs/ecs.config&#34;</span>
+</code></pre></div><p>We can assign it in this way:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=color:#e6db74>&#34;Athena&#34;</span><span style=color:#960050;background-color:#1e0010>:</span> {
+  <span style=color:#f92672>&#34;Type&#34;</span>: <span style=color:#e6db74>&#34;AWS::EC2::Instance&#34;</span>,
+  <span style=color:#f92672>&#34;Properties&#34;</span>: {
+    <span style=color:#960050;background-color:#1e0010>.</span><span style=color:#960050;background-color:#1e0010>.</span><span style=color:#960050;background-color:#1e0010>.</span>
+    <span style=color:#f92672>&#34;IamInstanceProfile&#34;</span> : {<span style=color:#f92672>&#34;Ref&#34;</span> : <span style=color:#e6db74>&#34;InstanceProfile&#34;</span>},
+    <span style=color:#960050;background-color:#1e0010>.</span><span style=color:#960050;background-color:#1e0010>.</span><span style=color:#960050;background-color:#1e0010>.</span>
+</code></pre></div><h3 id=ecs-configuration>ECS configuration</h3><p>Still not done. EC2 instance must know the cluster name. Here we can leverage <em>UserData</em> property:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=color:#e6db74>&#34;Athena&#34;</span><span style=color:#960050;background-color:#1e0010>:</span> {
+  <span style=color:#f92672>&#34;Type&#34;</span>: <span style=color:#e6db74>&#34;AWS::EC2::Instance&#34;</span>,
+  <span style=color:#f92672>&#34;Properties&#34;</span>: {
+    <span style=color:#960050;background-color:#1e0010>.</span><span style=color:#960050;background-color:#1e0010>.</span><span style=color:#960050;background-color:#1e0010>.</span>
+    <span style=color:#f92672>&#34;UserData&#34;</span>: { <span style=color:#f92672>&#34;Fn::Base64&#34;</span>: { <span style=color:#f92672>&#34;Fn::Join&#34;</span> : [ <span style=color:#e6db74>&#34;n&#34;</span>, [
+      <span style=color:#e6db74>&#34;#cloud-config&#34;</span>,
+      <span style=color:#e6db74>&#34;repo_update: true&#34;</span>,
+      <span style=color:#e6db74>&#34;repo_upgrade: all&#34;</span>,
+      <span style=color:#e6db74>&#34;package_upgrade: true&#34;</span>,
+      <span style=color:#e6db74>&#34;packages:&#34;</span>,
+      <span style=color:#e6db74>&#34; - aws-cli&#34;</span>,
+      <span style=color:#e6db74>&#34; - ecs-init&#34;</span>,
+      <span style=color:#e6db74>&#34;runcmd:&#34;</span>,
+      { <span style=color:#f92672>&#34;Fn::Join&#34;</span> : [ <span style=color:#e6db74>&#34;&#34;</span>, [
+        <span style=color:#e6db74>&#34; - echo ECS_CLUSTER=&#34;</span>,
+        { <span style=color:#f92672>&#34;Ref&#34;</span>: <span style=color:#e6db74>&#34;ECSCluster&#34;</span> },
+        <span style=color:#e6db74>&#34; &amp;gt;&amp;gt; /etc/ecs/ecs.config&#34;</span>
       ]]},
-      <span style="color:#e6db74">&#34; - service docker start&#34;</span>,
-      <span style="color:#e6db74">&#34; - start ecs&#34;</span> ]]}},
-      <span style="color:#960050;background-color:#1e0010">...</span>
-</code></pre></div><p>And …</p>
-<p><img src="/images/aws/athena-ecs-cluster.png" alt="Athena ECS Cluster"></p>
-<p>… victory 😉 Registered Container Instances shows 1.</p>
-<h2 id="service">Service</h2>
-<h3 id="task-definition">Task definition</h3>
-<p>I’m not going to cover task definition. You can study it
-<a href="http://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_defintions.html">here</a>. It’s pretty
-straightforward. Kind of stack file for Docker Cloud, but in JSON. Very similar.</p>
-<h3 id="travis-ciscript">Travis CI script</h3>
-<p>First part is task registration (or update with the same command). New revision is created if task
-already exists. It’s a simple sequence 1, 2, 3, …</p>
-<p>Sad is that I didn’t find a way how to specify revision number manually. Just to keep it in sync with
+      <span style=color:#e6db74>&#34; - service docker start&#34;</span>,
+      <span style=color:#e6db74>&#34; - start ecs&#34;</span> ]]}},
+      <span style=color:#960050;background-color:#1e0010>.</span><span style=color:#960050;background-color:#1e0010>.</span><span style=color:#960050;background-color:#1e0010>.</span>
+</code></pre></div><p>And …</p><p><img src=/images/aws/athena-ecs-cluster.png alt="Athena ECS Cluster"></p><p>… victory 😉 Registered Container Instances shows 1.</p><h2 id=service>Service</h2><h3 id=task-definition>Task definition</h3><p>I’m not going to cover task definition. You can study it
+<a href=http://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_defintions.html>here</a>. It’s pretty
+straightforward. Kind of stack file for Docker Cloud, but in JSON. Very similar.</p><h3 id=travis-ciscript>Travis CI script</h3><p>First part is task registration (or update with the same command). New revision is created if task
+already exists. It’s a simple sequence 1, 2, 3, …</p><p>Sad is that I didn’t find a way how to specify revision number manually. Just to keep it in sync with
 $_TRAVIS_BUILD_NUMBER_. Next part is more interesting. We try to get service ARN. If not found, we’re
-going to create it otherwise we’re going to update it.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">aws ecs register-task-definition --cli-input-json file://athena-task-definition.json
+going to create it otherwise we’re going to update it.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>aws ecs register-task-definition --cli-input-json file://athena-task-definition.json
 
-ARN<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>aws ecs describe-services --cluster Athena --services athena | jq <span style="color:#e6db74">&#39;.services? | .[0]? | .serviceArn?&#39;</span> -r -M<span style="color:#66d9ef">)</span>
-<span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span><span style="color:#e6db74">&#34;</span>$ARN<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;null&#34;</span><span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
-    aws ecs create-service <span style="color:#ae81ff">\
-</span><span style="color:#ae81ff"></span>        --cluster Athena <span style="color:#ae81ff">\
-</span><span style="color:#ae81ff"></span>        --service-name athena <span style="color:#ae81ff">\
-</span><span style="color:#ae81ff"></span>        --task-definition athena <span style="color:#ae81ff">\
-</span><span style="color:#ae81ff"></span>        --deployment-configuration maximumPercent<span style="color:#f92672">=</span>100,minimumHealthyPercent<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> <span style="color:#ae81ff">\
-</span><span style="color:#ae81ff"></span>        --desired-count <span style="color:#ae81ff">1</span>
-<span style="color:#66d9ef">else</span>
-    aws ecs update-service <span style="color:#ae81ff">\
-</span><span style="color:#ae81ff"></span>        --cluster Athena <span style="color:#ae81ff">\
-</span><span style="color:#ae81ff"></span>        --service $ARN <span style="color:#ae81ff">\
-</span><span style="color:#ae81ff"></span>        --task-definition athena <span style="color:#ae81ff">\
-</span><span style="color:#ae81ff"></span>        --deployment-configuration maximumPercent<span style="color:#f92672">=</span>100,minimumHealthyPercent<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> <span style="color:#ae81ff">\
-</span><span style="color:#ae81ff"></span>        --desired-count <span style="color:#ae81ff">1</span>
-<span style="color:#66d9ef">fi</span>&lt;
-</code></pre></div><blockquote>
-<p>There’s one issue with this script — if you delete service manually, it’s still accessible via
+ARN<span style=color:#f92672>=</span><span style=color:#66d9ef>$(</span>aws ecs describe-services --cluster Athena --services athena | jq <span style=color:#e6db74>&#39;.services? | .[0]? | .serviceArn?&#39;</span> -r -M<span style=color:#66d9ef>)</span>
+<span style=color:#66d9ef>if</span> <span style=color:#f92672>[</span><span style=color:#e6db74>&#34;</span>$ARN<span style=color:#e6db74>&#34;</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;null&#34;</span><span style=color:#f92672>]</span>; <span style=color:#66d9ef>then</span>
+    aws ecs create-service <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>        --cluster Athena <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>        --service-name athena <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>        --task-definition athena <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>        --deployment-configuration maximumPercent<span style=color:#f92672>=</span>100,minimumHealthyPercent<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span> <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>        --desired-count <span style=color:#ae81ff>1</span>
+<span style=color:#66d9ef>else</span>
+    aws ecs update-service <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>        --cluster Athena <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>        --service $ARN <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>        --task-definition athena <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>        --deployment-configuration maximumPercent<span style=color:#f92672>=</span>100,minimumHealthyPercent<span style=color:#f92672>=</span><span style=color:#ae81ff>0</span> <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>        --desired-count <span style=color:#ae81ff>1</span>
+<span style=color:#66d9ef>fi</span>&lt;
+</code></pre></div><blockquote><p>There’s one issue with this script — if you delete service manually, it’s still accessible via
 AWS CLI (state is inactive). Service ARN is found, but update-service is going to fail;
-create-service must be used in this case. Better add state check to this script as well.</p>
-</blockquote>
-<p>Focus on
-<a href="http://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_DeploymentConfiguration.html">minimumHealthyPercent</a>.
+create-service must be used in this case. Better add state check to this script as well.</p></blockquote><p>Focus on
+<a href=http://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_DeploymentConfiguration.html>minimumHealthyPercent</a>.
 Value <em>0</em> says — feel free to stop my service during deployment. It’s useful in development environment
-where you can have one tiny instance for example. If you do not set it to <em>0</em>, deployment can fail:</p>
-<ul>
-<li>one tiny instance in cluster,</li>
-<li>not enough memory on your EC2 instance, because old revision is still running,</li>
-<li>port in use, because of the same reason,</li>
-<li>etc.</li>
-</ul>
-<p>Do not use this strategy in production environment. You should have more than one instance, setup
-<a href="http://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-load-balancing.html">load balancing</a>,
-etc.</p>
-<p>That’s it. You have pretty decent idea how EC2 Container Service works. Not all issues were covered, but
-should be enough to start with it. Hope that helps. It took me some time to find all these things.</p>
-
-  </section>
-</article>
-
-</main>
-
-</div>
-
-<footer>
-    <div class="container">
-        <span class="copyright">&copy; 2019 Robert Vojta (𝒵𝓇𝓏𝓀𝒶) - <a rel="license"
-                href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></span>
-    </div>
-</footer>
-
-</body>
-
-</html>
+where you can have one tiny instance for example. If you do not set it to <em>0</em>, deployment can fail:</p><ul><li>one tiny instance in cluster,</li><li>not enough memory on your EC2 instance, because old revision is still running,</li><li>port in use, because of the same reason,</li><li>etc.</li></ul><p>Do not use this strategy in production environment. You should have more than one instance, setup
+<a href=http://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-load-balancing.html>load balancing</a>,
+etc.</p><p>That’s it. You have pretty decent idea how EC2 Container Service works. Not all issues were covered, but
+should be enough to start with it. Hope that helps. It took me some time to find all these things.</p></section></article></main></div><footer><div class=container><span class=copyright>&copy; 2019 Robert Vojta (𝒵𝓇𝓏𝓀𝒶) - <a rel=license href=https://creativecommons.org/licenses/by-sa/4.0/>CC BY-SA 4.0</a></span></div></footer></body></html>

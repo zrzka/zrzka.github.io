@@ -1,175 +1,53 @@
-<!DOCTYPE html>
-<html lang="en-us">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="description"
-        content="">
-    <meta name="generator" content="Hugo 0.65.0" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/style.css" type="text/css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type="text/css">
-    <link rel="alternate" href="/index.xml" type="application/rss+xml" title="Robert Vojta (𝒵𝓇𝓏𝓀𝒶)">
-    <title>AWS journey — Cloud Formation - Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title>
-</head>
-
-<body>
-
-    <header>
-        <div class="container clearfix">
-            <a class="path" href="https://www.zrzka.dev/">Home</a>
-            <span class="caret">% _</span>
-            <div class="right">
-                
-                
-                <a class="path" href="/about/">About</a>
-                
-                |
-                <a class="path" href="/site/">Site</a>
-                
-            </div>
-        </div>
-    </header>
-
-    <div class="container">
-
-<main role="main" class="article">
-  
-<article class="single" itemscope itemtype="http://schema.org/BlogPosting">
-  <div class="meta">
-
-    <span class="key">published on</span>
-    <span class="val"><time itemprop="datePublished" datetime="2016-10-07">October 07, 2016</time></span>
-
-
-    <span class="key">in</span>
-    <span class="val">
-
-        <a href="/categories/articles">articles</a>
-
-    </span>
-
-
-    <br>
-    <span class="key">tags:</span>
-    <span class="val">
-
-        <a href="/tags/aws">aws</a>
-
-        <a href="/tags/cloud-formation">cloud-formation</a>
-
-    </span>
-
-  </div>
-  <h1 class="headline" itemprop="headline">AWS journey — Cloud Formation</h1>
-  <section class="body" itemprop="articleBody">
-    <p>As a <a href="https://www.purposefly.com/">small start up</a>, we’re playing with lot of technologies and we
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=description content><meta name=generator content="Hugo 0.64.1"><meta name=viewport content="width=device-width,initial-scale=1"><link rel=stylesheet href=/css/style.css type=text/css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type=text/css><link rel=alternate href=/index.xml type=application/rss+xml title="Robert Vojta (𝒵𝓇𝓏𝓀𝒶)"><title>AWS journey — Cloud Formation - Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title></head><body><header><div class="container clearfix"><a class=path href=https://www.zrzka.dev/>Home</a>
+<span class=caret>% _</span><div class=right><a class=path href=/about/>About</a>
+|
+<a class=path href=/site/>Site</a></div></div></header><div class=container><main role=main class=article><article class=single itemscope itemtype=http://schema.org/BlogPosting><div class=meta><span class=key>published on</span>
+<span class=val><time itemprop=datePublished datetime=2016-10-07>October 07, 2016</time></span>
+<span class=key>in</span>
+<span class=val><a href=/categories/articles>articles</a></span><br><span class=key>tags:</span>
+<span class=val><a href=/tags/aws>aws</a>
+<a href=/tags/cloud-formation>cloud-formation</a></span></div><h1 class=headline itemprop=headline>AWS journey — Cloud Formation</h1><section class=body itemprop=articleBody><p>As a <a href=https://www.purposefly.com/>small start up</a>, we’re playing with lot of technologies and we
 try to choose the best ones. Okay, sometimes not because of money constraints, but we’re trying.
 One day, can’t remember when it was, we decided to go with AWS. Not just EC2 instances for Docker
 Cloud, but full stack. I mean API Gateway, Lambda, EC2, ECS, DynamoDB, etc. Counted them, AWS
 provides 51 services. Some of them are perfect, some of them still needs polishing, but they’re
-pretty good generally speaking.</p>
-<p>Quite huge, isn’t it? Learning curve is pretty steep and you’re going to make lot of mistakes.
+pretty good generally speaking.</p><p>Quite huge, isn’t it? Learning curve is pretty steep and you’re going to make lot of mistakes.
 Sometimes fatal ones. We, especially I, made them. I’m going to share some of them, some tips, so,
-you can avoid head scratching and long night shifts fixing these mistakes when your customers are asleep.</p>
-<h2 id="cloudformation">CloudFormation</h2>
-<p>AWS CloudFormation gives developers and systems administrators an easy way to create and manage
-a collection of related AWS resources, provisioning and updating them in an orderly and predictable fashion.</p>
-<p>Don’t start with CloudFormation if you’re new to the AWS platform. It slows you down, because you have
+you can avoid head scratching and long night shifts fixing these mistakes when your customers are asleep.</p><h2 id=cloudformation>CloudFormation</h2><p>AWS CloudFormation gives developers and systems administrators an easy way to create and manage
+a collection of related AWS resources, provisioning and updating them in an orderly and predictable fashion.</p><p>Don’t start with CloudFormation if you’re new to the AWS platform. It slows you down, because you have
 to learn template system, how to use
-<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html"><em>Fn::Join</em> &amp; friends</a>,
-<a href="https://blogs.aws.amazon.com/application-management/post/Tx1T9JYQOS8AB9I/Use-Nested-Stacks-to-Create-Reusable-Templates-and-Support-Role-Specialization">nested stack</a>,
-<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html">outputs</a>,
-<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html">parameters</a>,
-… You have to learn it along with other AWS services and it’s not an easy task.</p>
-<p>Don’t take me wrong. I like CloudFormation, I do use it and I recommend it. What I’m trying to say is — don’t
+<a href=http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html><em>Fn::Join</em> & friends</a>,
+<a href=https://blogs.aws.amazon.com/application-management/post/Tx1T9JYQOS8AB9I/Use-Nested-Stacks-to-Create-Reusable-Templates-and-Support-Role-Specialization>nested stack</a>,
+<a href=http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html>outputs</a>,
+<a href=http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html>parameters</a>,
+… You have to learn it along with other AWS services and it’s not an easy task.</p><p>Don’t take me wrong. I like CloudFormation, I do use it and I recommend it. What I’m trying to say is — don’t
 try to learn everything at once. One by one. Learn whatever service you choose, then jump into the Cloud
-Formation and create templates. Why?</p>
-<ul>
-<li>You do not want to learn how to write template when you have no clue how API Gateway &amp; Lambda
-works for example.</li>
-<li>You do not want to wait for deployment (it’s fast, but not enough sometimes), you want to tweak
-settings, play with it and test it immediately.</li>
-</ul>
-<p>Also you can easily shoot yourself:</p>
-<ul>
-<li>Resources deployed via CF templates shouldn’t be manually tweaked at all. You can easily update your
+Formation and create templates. Why?</p><ul><li>You do not want to learn how to write template when you have no clue how API Gateway & Lambda
+works for example.</li><li>You do not want to wait for deployment (it’s fast, but not enough sometimes), you want to tweak
+settings, play with it and test it immediately.</li></ul><p>Also you can easily shoot yourself:</p><ul><li>Resources deployed via CF templates shouldn’t be manually tweaked at all. You can easily update your
 templates, CF can process these updates and it updates resources automatically. If you touch them
-manually, CF can be puzzled (state differs) and you can end up in limbo.</li>
-<li>Never delete resources manually. Update template and let CF process it. If you do it in reverse order,
+manually, CF can be puzzled (state differs) and you can end up in limbo.</li><li>Never delete resources manually. Update template and let CF process it. If you do it in reverse order,
 CF can be puzzled. You can fix it by recreating resource manually sometimes. Better learn how to work with
-<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-deletionpolicy.html">DeletionPolicy</a>
-attribute.</li>
-<li>What’s more important. Never ever delete nested stack manually. This action is not reversible.
+<a href=http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-attribute-deletionpolicy.html>DeletionPolicy</a>
+attribute.</li><li>What’s more important. Never ever delete nested stack manually. This action is not reversible.
 You can recreate nested stack with the same name, but it has different PhysicalID and thus the stack
-is there, but it’s not linked to your parent stack.</li>
-</ul>
-<p><img src="/images/aws/update-rollback-failed.png" alt="Update Rollback Failed"></p>
-<p>I deleted nested stack manually (frankly, I don’t know why I did it) and I’m angry with myself.</p>
-<p><img src="/images/aws/update-rollback-failed-2.png" alt="Update Rollback Failed"></p>
-<p>Hope AWS support guys can help me (tweak resource PhysicalID) and if not I’ll be forced to delete stack,
-resources, … and create everything “from scratch”.</p>
-<p>“From scratch” in quotes, because we have templates for 99.9999% of our resources. But there are other
+is there, but it’s not linked to your parent stack.</li></ul><p><img src=/images/aws/update-rollback-failed.png alt="Update Rollback Failed"></p><p>I deleted nested stack manually (frankly, I don’t know why I did it) and I’m angry with myself.</p><p><img src=/images/aws/update-rollback-failed-2.png alt="Update Rollback Failed"></p><p>Hope AWS support guys can help me (tweak resource PhysicalID) and if not I’ll be forced to delete stack,
+resources, … and create everything “from scratch”.</p><p>“From scratch” in quotes, because we have templates for 99.9999% of our resources. But there are other
 things to fix with this redeployment like Lambda functions configuration (another beast, will dive into
-details in another article), Continuous Integration (we do use Travis CI), etc.</p>
-<h2 id="nested-stacks">Nested stacks</h2>
-<p>You can split one stack into several stacks and link them together. You can pass output from one stack
+details in another article), Continuous Integration (we do use Travis CI), etc.</p><h2 id=nested-stacks>Nested stacks</h2><p>You can split one stack into several stacks and link them together. You can pass output from one stack
 as a parameter value to another one, which is really convenient. This is not possible with standalone
 stacks. I’m tempted to recommend one root stack for all your stacks. You never know when you’ll need
-output of one stack as an input for another one.</p>
-<p>We have several root stacks, several nested stacks, but these root stacks are not linked together with
+output of one stack as an input for another one.</p><p>We have several root stacks, several nested stacks, but these root stacks are not linked together with
 some kind of top level stack for everything. My hope is recently announced
-<a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html">Fn::ImportValue</a>
-function. But there’s one limitation which bothers me little bit:</p>
-<blockquote>
-<p>You can’t modify or remove the output value as long as it’s referenced by another stack.</p>
-</blockquote>
-<p>I didn’t find time to test this function. But if I understand it correctly, I can’t change the output
+<a href=http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html>Fn::ImportValue</a>
+function. But there’s one limitation which bothers me little bit:</p><blockquote><p>You can’t modify or remove the output value as long as it’s referenced by another stack.</p></blockquote><p>I didn’t find time to test this function. But if I understand it correctly, I can’t change the output
 value with template update, because the value is kinda “copied” to another stack and then the initial
-stack is locked. If so, not sure how useful this feature is. Because nested stacks, outputs &amp; parameters,
+stack is locked. If so, not sure how useful this feature is. Because nested stacks, outputs & parameters,
 handle this very well. Whenever I change something in one stack, all other dependent stacks are updated
-accordingly.</p>
-<p>What I’m going to do? Will test <em>Fn::ImportValue</em> and will use it. Or I’ll refactor our stacks and will
-add 3rd level (top for all stacks).</p>
-<h2 id="my-cloud-formation-workflow">My Cloud Formation workflow</h2>
-<ul>
-<li>I manually create resources, tweak them and make them working together. Especially when I’m trying
-to learn new AWS service and I don’t know how to do it properly yet.</li>
-<li>If they’re in acceptable state, they work, I do not expect huge changes, work on CF templates is started.</li>
-<li>Then I delete manually created resources, put these templates in our repo where Travis CI handles them
-automatically (stack creation, updates, …).</li>
-<li>I no longer care about these resources in the AWS Console and I work with templates only.</li>
-</ul>
-<p>Skipping first step when I know what I would like to achieve and <strong>mainly</strong> how to do it.</p>
-<h2 id="conclusion">Conclusion</h2>
-<p>Use it, highly recommended, but try to learn other services first. Then learn how to describe them in
-Cloud Formation templates.</p>
-<p>Think twice:</p>
-<ul>
-<li>Don’t create huge, not easily maintainable stacks. Use nested stacks.</li>
-<li>Is there a tiny chance that you’ll need the output value of one stack as an input value for another stack?
-Use nested stacks. (or <em>Fn::ImportValue</em>, not tested yet)</li>
-<li>Don’t tweak resources created via CF manually. Don’t delete them as well.</li>
-<li>Learn how <em>DeletionPolicy</em> attribute works.</li>
-<li>Finally, don’t delete nested stack manually = limbo.</li>
-</ul>
-<p>Templates allows me to deploy everything in under 15 minutes without worrying if I did or didn’t make
-a mistake. Who likes manual and repetitive work? Me not. So, use them.</p>
-
-  </section>
-</article>
-
-</main>
-
-</div>
-
-<footer>
-    <div class="container">
-        <span class="copyright">&copy; 2019 Robert Vojta (𝒵𝓇𝓏𝓀𝒶) - <a rel="license"
-                href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></span>
-    </div>
-</footer>
-
-</body>
-
-</html>
+accordingly.</p><p>What I’m going to do? Will test <em>Fn::ImportValue</em> and will use it. Or I’ll refactor our stacks and will
+add 3rd level (top for all stacks).</p><h2 id=my-cloud-formation-workflow>My Cloud Formation workflow</h2><ul><li>I manually create resources, tweak them and make them working together. Especially when I’m trying
+to learn new AWS service and I don’t know how to do it properly yet.</li><li>If they’re in acceptable state, they work, I do not expect huge changes, work on CF templates is started.</li><li>Then I delete manually created resources, put these templates in our repo where Travis CI handles them
+automatically (stack creation, updates, …).</li><li>I no longer care about these resources in the AWS Console and I work with templates only.</li></ul><p>Skipping first step when I know what I would like to achieve and <strong>mainly</strong> how to do it.</p><h2 id=conclusion>Conclusion</h2><p>Use it, highly recommended, but try to learn other services first. Then learn how to describe them in
+Cloud Formation templates.</p><p>Think twice:</p><ul><li>Don’t create huge, not easily maintainable stacks. Use nested stacks.</li><li>Is there a tiny chance that you’ll need the output value of one stack as an input value for another stack?
+Use nested stacks. (or <em>Fn::ImportValue</em>, not tested yet)</li><li>Don’t tweak resources created via CF manually. Don’t delete them as well.</li><li>Learn how <em>DeletionPolicy</em> attribute works.</li><li>Finally, don’t delete nested stack manually = limbo.</li></ul><p>Templates allows me to deploy everything in under 15 minutes without worrying if I did or didn’t make
+a mistake. Who likes manual and repetitive work? Me not. So, use them.</p></section></article></main></div><footer><div class=container><span class=copyright>&copy; 2019 Robert Vojta (𝒵𝓇𝓏𝓀𝒶) - <a rel=license href=https://creativecommons.org/licenses/by-sa/4.0/>CC BY-SA 4.0</a></span></div></footer></body></html>
