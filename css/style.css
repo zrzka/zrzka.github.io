@@ -531,5 +531,3 @@ pre { background: #2d2d2d; background: var(--base00); color: #f2f0ec; color: var
 .highlight .vg { color: #f2777a; color: var(--base08) } /* Name.Variable.Global */
 .highlight .vi { color: #f2777a; color: var(--base08) } /* Name.Variable.Instance */
 .highlight .il { color: #f99157; color: var(--base09) } /* Literal.Number.Integer.Long */
-
-/*# sourceMappingURL=style.css.map */
