@@ -1,4 +1,4 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=description content><meta name=generator content="Hugo 0.64.1"><meta name=viewport content="width=device-width,initial-scale=1"><link rel=stylesheet href=/css/style.css type=text/css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type=text/css><link rel=alternate href=/index.xml type=application/rss+xml title="Robert Vojta (𝒵𝓇𝓏𝓀𝒶)"><title>Python IDE on the iPad Pro - Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title></head><body><header><div class="container clearfix"><a class=path href=https://www.zrzka.dev/>Home</a>
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=description content><meta name=generator content="Hugo 0.65.3"><meta name=viewport content="width=device-width,initial-scale=1"><script type=application/javascript>var doNotTrack=false;if(!doNotTrack){(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');ga('create','UA-110967877-1','auto');ga('send','pageview');}</script><link rel=stylesheet href=/css/style.css type=text/css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type=text/css><link rel=alternate href=/index.xml type=application/rss+xml title="Robert Vojta (𝒵𝓇𝓏𝓀𝒶)"><title>Python IDE on the iPad Pro - Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title></head><body><header><div class="container clearfix"><a class=path href=https://www.zrzka.dev/>Home</a>
 <span class=caret>% _</span><div class=right><a class=path href=/services/>Services</a></div></div></header><div class=container><main role=main class=article><article class=single itemscope itemtype=http://schema.org/BlogPosting><div class=meta><span class=key>published on</span>
 <span class=val><time itemprop=datePublished datetime=2017-10-20>October 20, 2017</time></span>
 <span class=key>in</span>
@@ -81,7 +81,7 @@ new method to the class and exchange implementations with the original one.</li>
     <span style=color:#66d9ef>return</span> ns(commands)<span style=color:#f92672>.</span>ptr
 </code></pre></div><p>Simple one, which gets the original list of key commands and adds our ones from the <code>_key_commands</code>
 list (module global variable). We do not need to add new method explicitly, our <code>swizzle</code> function
-does it automatically:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>swizzle(<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>UIApplication</span><span style=color:#e6db74>&#39;</span>, <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>keyCommands</span><span style=color:#e6db74>&#39;</span>, _blackmamba_keyCommands)
+does it automatically:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>swizzle(<span style=color:#e6db74>&#39;UIApplication&#39;</span>, <span style=color:#e6db74>&#39;keyCommands&#39;</span>, _blackmamba_keyCommands)
 </code></pre></div><p>What happened? A picture is worth a thousand words:</p><p><img src=/images/python/swizzle.png alt=Swizzle></p><p>The only remaining thing now is to introduce function, which allows us to register keyboard shortcuts —
 <a href=https://github.com/zrzka/blackmamba/blob/v1.3.1/blackmamba/uikit/keyboard.py#L305>register_key_command</a>.
 Signature of this function follows.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>_register_key_command</span>(input, modifier_flags, function, title<span style=color:#f92672>=</span>None)
@@ -93,10 +93,10 @@ which does contain values for special keys like left arrow.</li><li><code>modifi
 )
 
 <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>hallo</span>():
-   <span style=color:#66d9ef>print</span>(<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>Hallo</span><span style=color:#e6db74>&#39;</span>)
+   <span style=color:#66d9ef>print</span>(<span style=color:#e6db74>&#39;Hallo&#39;</span>)
 
 register_key_command(
-   <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>h</span><span style=color:#e6db74>&#39;</span>,
+   <span style=color:#e6db74>&#39;h&#39;</span>,
    UIKeyModifier<span style=color:#f92672>.</span>command,
    hallo
 )
@@ -122,7 +122,7 @@ use it and wrote another script —
 <a href=https://github.com/zrzka/blackmamba/blob/v1.3.1/blackmamba/script/drag_and_drop.py>drag_and_drop.py</a>.</p><p>This script demonstrates how to create custom classes, classes that implements protocols like
 <code>UITableViewDragDelegate</code> and how to use blocks. I think it’s pretty self explanatory except one thing.</p><p>There’s experimental support of blocks in Pythonista. You can write a Python function and create block
 from it. Here’s an example:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>block_imp</span>(_cmd):
-   <span style=color:#66d9ef>print</span>(<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>Hallo</span><span style=color:#e6db74>&#39;</span>)
+   <span style=color:#66d9ef>print</span>(<span style=color:#e6db74>&#39;Hallo&#39;</span>)
 
 block <span style=color:#f92672>=</span> ObjCBlock(
    block_imp,
@@ -149,15 +149,15 @@ I wrote.</p><p>Can the iPad Pro replace my desktop computer? Yup, it can. There�
 rather use my MacBook Pro, but the number of them is very low.</p><p>Did you ever think that it will be possible to do these kind of things? In an App Store application,
 no jailbreak, … Me not, never, until now. And I can’t still kind of believe it.</p><p>Learn or die and remember, <strong>sky is the limit</strong> 🙂</p><p>Again, many thanks to <a href=https://twitter.com/olemoritz>Ole</a> for writing this wonderful piece of
 software! Please, <a href="https://itunes.apple.com/us/app/pythonista-3/id1085978097?ls=1&mt=8">buy</a> it to
-support Ole’s ongoing effort to make it better.</p><h2 id=links>Links</h2><ul><li><a href=http://omz-software.com/pythonista/>Pythonista for iOS</a></li><li><a href=https://workingcopyapp.com>Working Copy for iOS</a></li><li><a href=https://github.com/ywangd/stash>StaSh</a></li><li><a href=http://blackmamba.readthedocs.io/>Black Mamba documentation</a></li><li><a href=https://github.com/zrzka/blackmamba>Black Mamba repository</a></li></ul><h2 id=django-notes>Django notes</h2><p>If you’d like to run Django application on your iPad Pro, don’t forget to pass following arguments:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>dir <span style=color:#f92672>=</span> os<span style=color:#f92672>.</span>path<span style=color:#f92672>.</span>abspath(os<span style=color:#f92672>.</span>path<span style=color:#f92672>.</span>join(os<span style=color:#f92672>.</span>path<span style=color:#f92672>.</span>dirname(path), <span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>../application</span><span style=color:#e6db74>&#39;</span>))
+support Ole’s ongoing effort to make it better.</p><h2 id=links>Links</h2><ul><li><a href=http://omz-software.com/pythonista/>Pythonista for iOS</a></li><li><a href=https://workingcopyapp.com>Working Copy for iOS</a></li><li><a href=https://github.com/ywangd/stash>StaSh</a></li><li><a href=http://blackmamba.readthedocs.io/>Black Mamba documentation</a></li><li><a href=https://github.com/zrzka/blackmamba>Black Mamba repository</a></li></ul><h2 id=django-notes>Django notes</h2><p>If you’d like to run Django application on your iPad Pro, don’t forget to pass following arguments:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>dir <span style=color:#f92672>=</span> os<span style=color:#f92672>.</span>path<span style=color:#f92672>.</span>abspath(os<span style=color:#f92672>.</span>path<span style=color:#f92672>.</span>join(os<span style=color:#f92672>.</span>path<span style=color:#f92672>.</span>dirname(path), <span style=color:#e6db74>&#39;../application&#39;</span>))
 sys<span style=color:#f92672>.</span>path<span style=color:#f92672>.</span>append(dir)
 <span style=color:#75715e># import Django execute_from_command_line</span>
 arguments <span style=color:#f92672>=</span> list(sys<span style=color:#f92672>.</span>argv)
-arguments<span style=color:#f92672>.</span>append(<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>runserver</span><span style=color:#e6db74>&#39;</span>)
-arguments<span style=color:#f92672>.</span>append(<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>--noreload</span><span style=color:#e6db74>&#39;</span>)
-arguments<span style=color:#f92672>.</span>append(<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>--nothreading</span><span style=color:#e6db74>&#39;</span>)
-arguments<span style=color:#f92672>.</span>append(<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>-v</span><span style=color:#e6db74>&#39;</span>)
-arguments<span style=color:#f92672>.</span>append(<span style=color:#e6db74></span><span style=color:#e6db74>&#39;</span><span style=color:#e6db74>0</span><span style=color:#e6db74>&#39;</span>)
+arguments<span style=color:#f92672>.</span>append(<span style=color:#e6db74>&#39;runserver&#39;</span>)
+arguments<span style=color:#f92672>.</span>append(<span style=color:#e6db74>&#39;--noreload&#39;</span>)
+arguments<span style=color:#f92672>.</span>append(<span style=color:#e6db74>&#39;--nothreading&#39;</span>)
+arguments<span style=color:#f92672>.</span>append(<span style=color:#e6db74>&#39;-v&#39;</span>)
+arguments<span style=color:#f92672>.</span>append(<span style=color:#e6db74>&#39;0&#39;</span>)
 logging<span style=color:#f92672>.</span>disable(logging<span style=color:#f92672>.</span>CRITICAL)
 <span style=color:#66d9ef>try</span>:
     execute_from_command_line(arguments)
