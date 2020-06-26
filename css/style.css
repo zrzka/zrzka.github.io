@@ -378,7 +378,7 @@ article.single pre {
 }
 
 article.single p code {
-  padding: 0.2em 0.5em;
+  padding: 0.05em 0.3em 0.05em 0.3em;
   border-radius: 3px;
   background: #747369;
   background: var(--base03);
