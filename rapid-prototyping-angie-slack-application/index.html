@@ -1,11 +1,46 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=description content><meta name=generator content="Hugo 0.73.0"><meta name=viewport content="width=device-width,initial-scale=1"><link rel=stylesheet href=/css/style.css type=text/css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type=text/css><link rel=alternate href=/index.xml type=application/rss+xml title="Robert Vojta (𝒵𝓇𝓏𝓀𝒶)"><title>Rapid prototyping & Angie & Slack application - Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title></head><body><header><div class="container clearfix"><a class=path href=https://www.zrzka.dev/>Home</a>
-<span class=caret>% _</span><div class=right><a class=path href=/services/>Services</a></div></div></header><div class=container><main role=main class=article><article class=single itemscope itemtype=http://schema.org/BlogPosting><div class=meta><span class=key>published on</span>
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta name=description content>
+<meta name=generator content="Hugo 0.89.4">
+<meta name=viewport content="width=device-width,initial-scale=1">
+<link rel=stylesheet href=/css/style.css type=text/css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type=text/css>
+<link rel=alternate href=/index.xml type=application/rss+xml title="Robert Vojta (𝒵𝓇𝓏𝓀𝒶)">
+<title>Rapid prototyping & Angie & Slack application - Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title>
+</head>
+<body>
+<header>
+<div class="container clearfix">
+<a class=path href=https://www.zrzka.dev/>Home</a>
+<span class=caret>% _</span>
+<div class=right>
+<a class=path href=/services/>Services</a>
+</div>
+</div>
+</header>
+<div class=container>
+<main role=main class=article>
+<article class=single itemscope itemtype=http://schema.org/BlogPosting>
+<div class=meta>
+<span class=key>published on</span>
 <span class=val><time itemprop=datePublished datetime=2017-12-08>December 08, 2017</time></span>
 <span class=key>in</span>
-<span class=val><a href=/categories/all>all</a></span><br><span class=key>tags:</span>
-<span class=val><a href=/tags/prototyping>prototyping</a></span></div><h1 class=headline itemprop=headline>Rapid prototyping & Angie & Slack application</h1><section class=body itemprop=articleBody><p>We&rsquo;re trying new ideas for our <a href=https://www.purposefly.com>startup</a> and they need to be tested quickly.
+<span class=val>
+<a href=/categories/all>all</a>
+</span>
+<br>
+<span class=key>tags:</span>
+<span class=val>
+<a href=/tags/prototyping>prototyping</a>
+</span>
+</div>
+<h1 class=headline itemprop=headline>Rapid prototyping & Angie & Slack application</h1>
+<section class=body itemprop=articleBody>
+<p>We&rsquo;re trying new ideas for our <a href=https://www.purposefly.com>startup</a> and they need to be tested quickly.
 With real users. We&rsquo;re just connecting available dots without reinventing the wheel if there&rsquo;s
-existing solution for particular problem. Here&rsquo;s an example what we just did in a few days.</p><p>Our flagship <a href=https://www.purposefly.com/frank/>Frank</a> is well accepted by customers. They like it,
+existing solution for particular problem. Here&rsquo;s an example what we just did in a few days.</p>
+<p>Our flagship <a href=https://www.purposefly.com/frank/>Frank</a> is well accepted by customers. They like it,
 because it&rsquo;s simple (survey with five questions) and it gives them good results. When compared to another
 performance review tools (like 360, etc.), it&rsquo;s blazingly fast. But how many surveys are you going to
 create per year? Three, four? Probably. We&rsquo;re still thinking how to improve the whole evaluation
@@ -18,54 +53,112 @@ points based on actions like create event, up vote, down vote, &mldr; Team leade
 can decide what they&rsquo;re going to do with these results - it can be part of your salary, one-time
 rewards, etc. This tool is also inspired by the
 <a href=https://stackoverflow.com/help/whats-reputation>Stack Overflow reputation system</a>.
-Let&rsquo;s write some prototype.</p><h2 id=teams-users>Teams, users</h2><p>First thing we need are users and teams. The easiest way is to reuse existing information. Don&rsquo;t
+Let&rsquo;s write some prototype.</p>
+<h2 id=teams-users>Teams, users</h2>
+<p>First thing we need are users and teams. The easiest way is to reuse existing information. Don&rsquo;t
 forget, we&rsquo;re just prototyping. Lot of companies use <a href=https://slack.com>Slack</a> today. Slack has
 quite nice API and interaction components like dialogs, interactive messages with buttons, &mldr;
 What about teams? Team in the Slack context is the whole organization. But there&rsquo;re channels
 and these channels are mainly used to divide people into groups with some specific topic. Angie
-can treat channels as teams for now.</p><p>Nice, first task done - we have <a href=https://api.slack.com/methods/users.list>users</a> and
+can treat channels as teams for now.</p>
+<p>Nice, first task done - we have <a href=https://api.slack.com/methods/users.list>users</a> and
 <a href=https://api.slack.com/methods/channels.list>teams</a>. What&rsquo;s important is that no one needs to
 register, create organization, maintain members, organisation chart, &mldr; It&rsquo;s really important
 for prototyping. Not just for you (developer), but also for your prototype users / testers.
-Keep it as simple as possible.</p><h2 id=create-event>Create event</h2><p>Event is an entity with name and list of participants (= team members = Slack&rsquo;s channel members).
+Keep it as simple as possible.</p>
+<h2 id=create-event>Create event</h2>
+<p>Event is an entity with name and list of participants (= team members = Slack&rsquo;s channel members).
 Slack provides <a href=https://api.slack.com/dialogs>dialogs</a>. They&rsquo;re kinda limited (text field, text
 area or options), but they suit our needs and we are going to use them. How one can open a dialog?
 <a href=https://api.slack.com/slash-commands>Slash command</a>. In our case, it&rsquo;s
-<code>/angie new [event-name] [#channel]</code>. Here&rsquo;s the result.</p><p><img src=/images/purposefly/slack-angie-new-event.png alt="Angie - New event"></p><p>Whenever user hits <em>Create</em> button, application receives payload with validated user input. We can
+<code>/angie new [event-name] [#channel]</code>. Here&rsquo;s the result.</p>
+<p><img src=/images/purposefly/slack-angie-new-event.png alt="Angie - New event"></p>
+<p>Whenever user hits <em>Create</em> button, application receives payload with validated user input. We can
 validate it again (if it&rsquo;s required, Slack provides simple validation like input length only), send
-back errors (shown in the dialog itself) or just accept it for processing.</p><h2 id=notification-to-users>Notification to users</h2><p>We can think of <a href=https://api.slack.com/methods/chat.postEphemeral>ephemeral messages</a> sent to
-respective users in the selected channel. It&rsquo;s not a good idea.</p><blockquote><p>Ephemeral message delivery is not guaranteed — the user must be currently active in Slack
+back errors (shown in the dialog itself) or just accept it for processing.</p>
+<h2 id=notification-to-users>Notification to users</h2>
+<p>We can think of <a href=https://api.slack.com/methods/chat.postEphemeral>ephemeral messages</a> sent to
+respective users in the selected channel. It&rsquo;s not a good idea.</p>
+<blockquote>
+<p>Ephemeral message delivery is not guaranteed — the user must be currently active in Slack
 and a member of the specified channel. By nature, ephemeral messages do not persist across
-reloads, desktop and mobile apps, or sessions.</p></blockquote><p>I already did this mistake, because I missed this paragraph in the documentation and these
+reloads, desktop and mobile apps, or sessions.</p>
+</blockquote>
+<p>I already did this mistake, because I missed this paragraph in the documentation and these
 messages are not delivered if user is not active (offline, &mldr;). We stick with
 <a href=https://api.slack.com/methods/im.list>im.list</a>, <a href=https://api.slack.com/methods/im.open>im.open</a>
 and <a href=https://api.slack.com/methods/chat.postMessage>chat.postMessage</a> to the IM (direct message)
-channel. These messages are always delivered.</p><h2 id=voting>Voting</h2><p>Any message can contain <a href=https://api.slack.com/docs/message-attachments>attachments with buttons</a>.
-Let&rsquo;s reuse them. Here&rsquo;s the example of the voting message.</p><p><img src=/images/purposefly/slack-angie-vote-message.png alt="Angie - Vote message"></p><p><a href=https://api.slack.com/docs/message-buttons>Buttons</a> can have style like default (black), danger
+channel. These messages are always delivered.</p>
+<h2 id=voting>Voting</h2>
+<p>Any message can contain <a href=https://api.slack.com/docs/message-attachments>attachments with buttons</a>.
+Let&rsquo;s reuse them. Here&rsquo;s the example of the voting message.</p>
+<p><img src=/images/purposefly/slack-angie-vote-message.png alt="Angie - Vote message"></p>
+<p><a href=https://api.slack.com/docs/message-buttons>Buttons</a> can have style like default (black), danger
 (red). Whenever user hits the button, application receives payload with callback id and other values
 we did provide. Application can just accept the payload or return modified message. We&rsquo;re returning
-modified message reflecting current status:</p><ul><li>black button - user didn&rsquo;t vote for this member,</li><li>red button - user did vote for this member.</li></ul><p>Voting solved as well. We know it doesn&rsquo;t scale for massive amount of users (message cluttered
-with lot of buttons), but we also do not target huge teams, so, it&rsquo;s enough. Again, just prototyping.</p><h2 id=additional-commands>Additional commands</h2><p>Another commands (like <code>/angie list</code>, <code>/angie top</code>, &mldr;) were introduced as well. These commands
-allow anyone to check current events statuses.</p><p><code>/angie list</code> example:</p><p><img src=/images/purposefly/slack-angie-list-command.png alt="Angie - List command output"></p><p><code>/angie me</code> example:</p><p><img src=/images/purposefly/slack-angie-me-command.png alt="Angie - Me command output"></p><h2 id=charts>Charts</h2><p>These textual reports are nice, but it&rsquo;s not what our users expect. Charts are simply a must
+modified message reflecting current status:</p>
+<ul>
+<li>black button - user didn&rsquo;t vote for this member,</li>
+<li>red button - user did vote for this member.</li>
+</ul>
+<p>Voting solved as well. We know it doesn&rsquo;t scale for massive amount of users (message cluttered
+with lot of buttons), but we also do not target huge teams, so, it&rsquo;s enough. Again, just prototyping.</p>
+<h2 id=additional-commands>Additional commands</h2>
+<p>Another commands (like <code>/angie list</code>, <code>/angie top</code>, &mldr;) were introduced as well. These commands
+allow anyone to check current events statuses.</p>
+<p><code>/angie list</code> example:</p>
+<p><img src=/images/purposefly/slack-angie-list-command.png alt="Angie - List command output"></p>
+<p><code>/angie me</code> example:</p>
+<p><img src=/images/purposefly/slack-angie-me-command.png alt="Angie - Me command output"></p>
+<h2 id=charts>Charts</h2>
+<p>These textual reports are nice, but it&rsquo;s not what our users expect. Charts are simply a must
 and we do not want to do develop them as well. Here comes the <a href=https://plot.ly>plot.ly</a> service.
 We can prepare charts in the <a href=https://plot.ly/python/ipython-notebook-tutorial/>Jupyter Notebook</a>
 and reuse the same code in our application with <a href=https://pypi.python.org/pypi/plotly>plotly</a> package.
 Just replace <code>plotly.offline</code> (notebook) with <code>plotly.plotly</code> (application). It also allows us to
 upload secret charts and share them with anyone (private link with auth key). Or we can just embed
-them anywhere with the same link.</p><p>New commands <code>/angie report</code> and <code>/angie evolution</code> introduced. Plot.ly is little bit slow
+them anywhere with the same link.</p>
+<p>New commands <code>/angie report</code> and <code>/angie evolution</code> introduced. Plot.ly is little bit slow
 (takes up to 10s to generate the link), so, both of them are asynchronous. User will receive
-link when they&rsquo;re ready.</p><p><img src=/images/purposefly/slack-chart-links.png alt="Angie - Links response"></p><p>Report leverages Sankey with all the events on the left side and members on the right side.</p><p><img src=/images/purposefly/slack-report-command.png alt="Angie - Report chart"></p><p>Evolution is a simple day to day distribution of reputation points in your team.</p><p><img src=/images/purposefly/slack-evolution-command.png alt="Angie - Evolution chart"></p><p>And now we have charts for just $400 / year. Yes, we have to pay to get secret charts with
+link when they&rsquo;re ready.</p>
+<p><img src=/images/purposefly/slack-chart-links.png alt="Angie - Links response"></p>
+<p>Report leverages Sankey with all the events on the left side and members on the right side.</p>
+<p><img src=/images/purposefly/slack-report-command.png alt="Angie - Report chart"></p>
+<p>Evolution is a simple day to day distribution of reputation points in your team.</p>
+<p><img src=/images/purposefly/slack-evolution-command.png alt="Angie - Evolution chart"></p>
+<p>And now we have charts for just $400 / year. Yes, we have to pay to get secret charts with
 private links. But it&rsquo;s still very small amount compared to other solutions like developer&rsquo;s
-salary working with D3, &mldr;</p><h2 id=whats-next>What&rsquo;s next</h2><p>Prototype is finished and we&rsquo;re gathering data. Later we have to analyse them, modify reputation
+salary working with D3, &mldr;</p>
+<h2 id=whats-next>What&rsquo;s next</h2>
+<p>Prototype is finished and we&rsquo;re gathering data. Later we have to analyse them, modify reputation
 points distribution (change gain / lose points per action). And if we will be happy, we&rsquo;re going
-to improve it and create MVP from it.</p><p>Glad we have so many services around these days, lot of them are for free and they do allow
+to improve it and create MVP from it.</p>
+<p>Glad we have so many services around these days, lot of them are for free and they do allow
 us to rapidly prototype. This one was finished in several days (~ 2 weeks). Not bad for something
-users can directly test.</p><p>If you&rsquo;d like to test it, feel free to
+users can directly test.</p>
+<p>If you&rsquo;d like to test it, feel free to
 <a href="https://slack.com/oauth/authorize?client_id=16506319910.277314084213&scope=commands,bot">add it to your workspace</a>.
-<strong>But remember, it&rsquo;s a prototype</strong>.</p><h2 id=other-technologies-used>Other technologies used</h2><ul><li><a href=http://sanic.readthedocs.io/en/latest/>Sanic</a>,
+<strong>But remember, it&rsquo;s a prototype</strong>.</p>
+<h2 id=other-technologies-used>Other technologies used</h2>
+<ul>
+<li><a href=http://sanic.readthedocs.io/en/latest/>Sanic</a>,
 <a href=https://aiohttp.readthedocs.io/en/stable/>aiohttp</a>,
-<a href=http://aiomysql.readthedocs.io/en/latest/>aiomysql</a></li><li><a href=https://www.docker.com>Docker</a>,
+<a href=http://aiomysql.readthedocs.io/en/latest/>aiomysql</a></li>
+<li><a href=https://www.docker.com>Docker</a>,
 <a href=https://aws.amazon.com/ec2/>AWS EC2</a>,
-<a href=https://aws.amazon.com/rds/aurora/>AWS Aurora</a></li></ul><p>That&rsquo;s it for now. Don&rsquo;t reinvent the wheel and reuse everything you can find for your prototypes,
-MVPs, &mldr;</p></section></article></main></div><footer><div class=container><span class=copyright>&copy; 2020 Robert Vojta (𝒵𝓇𝓏𝓀𝒶) - <a rel=license href=https://creativecommons.org/licenses/by-sa/4.0/>CC BY-SA 4.0</a> - <a href=/site>Site
-Info</a></span></div></footer></body></html>
+<a href=https://aws.amazon.com/rds/aurora/>AWS Aurora</a></li>
+</ul>
+<p>That&rsquo;s it for now. Don&rsquo;t reinvent the wheel and reuse everything you can find for your prototypes,
+MVPs, &mldr;</p>
+</section>
+</article>
+</main>
+</div>
+<footer>
+<div class=container>
+<span class=copyright>&copy; 2020 Robert Vojta (𝒵𝓇𝓏𝓀𝒶) - <a rel=license href=https://creativecommons.org/licenses/by-sa/4.0/>CC BY-SA 4.0</a> - <a href=/site>Site
+Info</a></span>
+</div>
+</footer>
+</body>
+</html>

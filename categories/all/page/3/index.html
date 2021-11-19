@@ -1,10 +1,71 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=description content><meta name=generator content="Hugo 0.73.0"><meta name=viewport content="width=device-width,initial-scale=1"><link rel=stylesheet href=/css/style.css type=text/css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type=text/css><link rel=alternate href=/index.xml type=application/rss+xml title="Robert Vojta (𝒵𝓇𝓏𝓀𝒶)"><title>all - Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title></head><body><header><div class="container clearfix"><a class=path href=https://www.zrzka.dev/>Home</a>
-<span class=caret>% _</span><div class=right><a class=path href=/services/>Services</a></div></div></header><div class=container><main role=main class=article-list><h1 class=list-title>all</h1><article class=list-item itemscope itemtype=http://schema.org/Blog><h2 class=headline itemprop=headline><a href=/aws-journey-ec2-container-service/>AWS journey — EC2 Container Service</a></h2><div class=meta><span class=key>published on</span>
-<span class=val><time itemprop=datePublished datetime=2016-10-20>October 20, 2016</time></span></div><section class=summary>We were using (and we’re still it using for some services) Docker Cloud. Main problem with DC is that they can’t handle private subnets. EC2 instance must be in the public subnet and that’s not what we want. Hooray (irony), we have to switch to the EC2 Container Service. Try to explain this to our business department. Additional time for infrastructure. Can handle it, but it’s tough sometimes.
-Docker images repository Cloud Formation Template This step is optional, but we’re trying to leverage as many as possible AWS services. <a href=/aws-journey-ec2-container-service/>Read More...</a></section></article><article class=list-item itemscope itemtype=http://schema.org/Blog><h2 class=headline itemprop=headline><a href=/aws-journey-cloud-formation/>AWS journey — Cloud Formation</a></h2><div class=meta><span class=key>published on</span>
-<span class=val><time itemprop=datePublished datetime=2016-10-07>October 07, 2016</time></span></div><section class=summary>As a small start up, we’re playing with lot of technologies and we try to choose the best ones. Okay, sometimes not because of money constraints, but we’re trying. One day, can’t remember when it was, we decided to go with AWS. Not just EC2 instances for Docker Cloud, but full stack. I mean API Gateway, Lambda, EC2, ECS, DynamoDB, etc. Counted them, AWS provides 51 services. Some of them are perfect, some of them still needs polishing, but they’re pretty good generally speaking. <a href=/aws-journey-cloud-formation/>Read More...</a></section></article><article class=list-item itemscope itemtype=http://schema.org/Blog><h2 class=headline itemprop=headline><a href=/aws-lambda-api-gateway-error-handling/>AWS Lambda & API Gateway Error Handling</a></h2><div class=meta><span class=key>published on</span>
-<span class=val><time itemprop=datePublished datetime=2016-04-14>April 14, 2016</time></span></div><section class=summary>It’s fragile and kind of terrible. Let’s look at it. We have a function named lambda. It has one argument named action (enum with allowed values data, exception or timeout). First thing we would like to do is to validate input via schema. Then we would like to return custom error message (and status code) if it’s invalid or do other things based on the action argument value.
-Here’s the code, just to demonstrate how it works. <a href=/aws-lambda-api-gateway-error-handling/>Read More...</a></section></article></main><nav class=paginator><a class=nav-left href=/categories/all/page/2/>&lt; Prev</a>
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta name=description content>
+<meta name=generator content="Hugo 0.89.4">
+<meta name=viewport content="width=device-width,initial-scale=1">
+<link rel=stylesheet href=/css/style.css type=text/css>
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type=text/css>
+<link rel=alternate href=/index.xml type=application/rss+xml title="Robert Vojta (𝒵𝓇𝓏𝓀𝒶)">
+<title>all - Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title>
+</head>
+<body>
+<header>
+<div class="container clearfix">
+<a class=path href=https://www.zrzka.dev/>Home</a>
+<span class=caret>% _</span>
+<div class=right>
+<a class=path href=/services/>Services</a>
+</div>
+</div>
+</header>
+<div class=container>
+<main role=main class=article-list>
+<h1 class=list-title>all</h1>
+<article class=list-item itemscope itemtype=http://schema.org/Blog>
+<h2 class=headline itemprop=headline><a href=/aws-journey-ec2-container-service/>AWS journey — EC2 Container Service</a></h2>
+<div class=meta>
+<span class=key>published on</span>
+<span class=val><time itemprop=datePublished datetime=2016-10-20>October 20, 2016</time></span>
+</div>
+<section class=summary>
+We were using (and we’re still it using for some services) Docker Cloud. Main problem with DC is that they can’t handle private subnets. EC2 instance must be in the public subnet and that’s not what we want. Hooray (irony), we have to switch to the EC2 Container Service. Try to explain this to our business department. Additional time for infrastructure. Can handle it, but it’s tough sometimes.
+Docker images repository Cloud Formation Template This step is optional, but we’re trying to leverage as many as possible AWS services. <a href=/aws-journey-ec2-container-service/>Read More...</a>
+</section>
+</article>
+<article class=list-item itemscope itemtype=http://schema.org/Blog>
+<h2 class=headline itemprop=headline><a href=/aws-journey-cloud-formation/>AWS journey — Cloud Formation</a></h2>
+<div class=meta>
+<span class=key>published on</span>
+<span class=val><time itemprop=datePublished datetime=2016-10-07>October 07, 2016</time></span>
+</div>
+<section class=summary>
+As a small start up, we’re playing with lot of technologies and we try to choose the best ones. Okay, sometimes not because of money constraints, but we’re trying. One day, can’t remember when it was, we decided to go with AWS. Not just EC2 instances for Docker Cloud, but full stack. I mean API Gateway, Lambda, EC2, ECS, DynamoDB, etc. Counted them, AWS provides 51 services. Some of them are perfect, some of them still needs polishing, but they’re pretty good generally speaking. <a href=/aws-journey-cloud-formation/>Read More...</a>
+</section>
+</article>
+<article class=list-item itemscope itemtype=http://schema.org/Blog>
+<h2 class=headline itemprop=headline><a href=/aws-lambda-api-gateway-error-handling/>AWS Lambda & API Gateway Error Handling</a></h2>
+<div class=meta>
+<span class=key>published on</span>
+<span class=val><time itemprop=datePublished datetime=2016-04-14>April 14, 2016</time></span>
+</div>
+<section class=summary>
+It’s fragile and kind of terrible. Let’s look at it. We have a function named lambda. It has one argument named action (enum with allowed values data, exception or timeout). First thing we would like to do is to validate input via schema. Then we would like to return custom error message (and status code) if it’s invalid or do other things based on the action argument value.
+Here’s the code, just to demonstrate how it works. <a href=/aws-lambda-api-gateway-error-handling/>Read More...</a>
+</section>
+</article>
+</main>
+<nav class=paginator>
+<a class=nav-left href=/categories/all/page/2/>&lt; Prev</a>
 <span>3 / 3</span>
-<span class="nav-right faded">Next ></span></nav></div><footer><div class=container><span class=copyright>&copy; 2020 Robert Vojta (𝒵𝓇𝓏𝓀𝒶) - <a rel=license href=https://creativecommons.org/licenses/by-sa/4.0/>CC BY-SA 4.0</a> - <a href=/site>Site
-Info</a></span></div></footer></body></html>
+<span class="nav-right faded">Next ></span>
+</nav>
+</div>
+<footer>
+<div class=container>
+<span class=copyright>&copy; 2020 Robert Vojta (𝒵𝓇𝓏𝓀𝒶) - <a rel=license href=https://creativecommons.org/licenses/by-sa/4.0/>CC BY-SA 4.0</a> - <a href=/site>Site
+Info</a></span>
+</div>
+</footer>
+</body>
+</html>
