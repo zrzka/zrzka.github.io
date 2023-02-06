@@ -103,7 +103,7 @@ which does contain values for special keys like left arrow.</li><li><code>modifi
 </span></span></code></pre></div><p>Passed function <code>hallo</code> is wrapped with a function, which does meet Objective-C runtime specs.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>key_command_action</span>(_sel, _cmd, sender):
 </span></span><span style=display:flex><span>    function()
 </span></span></code></pre></div><p>Based on <code>input</code> and <code>modifier_flags</code>, method name is generated. <code>blackMambaHandleKeyCommandH:</code>
-in this case.</p><p><code>blackMambaHandleKeyCommandH:</code> method is added to the <code>UIApplication</code> with implementation pointing
+in this case.</p></p><p><code>blackMambaHandleKeyCommandH:</code> method is added to the <code>UIApplication</code> with implementation pointing
 to the <code>key_command_action</code>. <code>UIKeyCommand</code> object is created and stored in the <code>_key_commands</code> global list.</p><p><img src=/images/python/key-command-h.png alt="Key Command H diagram"></p><p>And that’s it. We have a way how to register custom keyboard shortcut, assign it to a function written
 in Python.</p><p>Pretty awesome and I can’t still believe it’s possible.</p><h2 id=keyboard-events>Keyboard events</h2><p>Imagine you have a dialog and you would like to use keyboard shortcuts for it as well. Like arrow
 keys to change selection, enter to confirm selection, <code>Cmd .</code> to close dialog, etc. Global shortcuts

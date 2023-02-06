@@ -70,7 +70,7 @@ these status codes in the Integration Response section.</p><p><img src=/images/a
 </span></span></code></pre></div><p>And the <em>errorMessage</em> is a string. Do you want to return more than just a string? You have to encode it.</p><p>Open the Integration Response section and you’ll see something like this:</p><p><img src=/images/aws/lambda-method-response-status.png alt="Lambda GET method response status"></p><p>Default mapping uses 200 for the status code, there’s no regex and Body Mapping Template
 (click on the triangle) is empty = passthrough. And because we know what our Lambda function
 returns, we can add some regular expressions there.</p><p><img src=/images/aws/lambda-method-response-statuses.png alt="Lambda GET method response statuses"></p><p>What’s this all about? Lambda Error Regex column contains regular expressions that are matched against
-<em>errorMessage</em> from the lambda response if it indicates it failed (<em>fail! in the code). For
+<em>errorMessage</em> from the lambda response if it indicates it failed (<em>fail!</em> in the code). For
 <em>INVALID_PARAMS</em> we would like to return 400, for any other error message (</em>.+_) we would like to
 return 500 and 200 for the rest.</p><p>Redeploy and test.</p><h3 id=actionexception-1>action=exception</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
 </span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;errorMessage&#34;</span>: <span style=color:#e6db74>&#34;{\&#34;error-code\&#34;:\&#34;EXCEPTION\&#34;,\&#34;error-message\&#34;:\&#34;#object[Error Error: Oops]\&#34;}&#34;</span>
