@@ -1,119 +1,240 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=description content><meta name=generator content="Hugo 0.109.0"><meta name=viewport content="width=device-width,initial-scale=1"><link rel=stylesheet href=/css/style.css type=text/css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type=text/css><link rel=alternate href=/index.xml type=application/rss+xml title="Robert Vojta (𝒵𝓇𝓏𝓀𝒶)"><title>AWS Lambda & API Gateway Error Handling - Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title></head><body><header><div class="container clearfix"><a class=path href=https://www.zrzka.dev/>Home</a>
-<span class=caret>% _</span><div class=right><a class=path href=/services/>Services</a></div></div></header><div class=container><main role=main class=article><article class=single itemscope itemtype=http://schema.org/BlogPosting><div class=meta><span class=key>published on</span>
-<span class=val><time itemprop=datePublished datetime=2016-04-14>April 14, 2016</time></span>
-<span class=key>in</span>
-<span class=val><a href=/categories/all>all</a></span><br><span class=key>tags:</span>
-<span class=val><a href=/tags/aws>aws</a>
-<a href=/tags/lambda>lambda</a>
-<a href=/tags/api-gateway>api-gateway</a></span></div><h1 class=headline itemprop=headline>AWS Lambda & API Gateway Error Handling</h1><section class=body itemprop=articleBody><p>It’s fragile and kind of terrible. Let’s look at it. We have a function named <em>lambda</em>. It has one
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description"
+        content="">
+    <meta name="generator" content="Hugo 0.109.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type="text/css">
+    <link rel="alternate" href="/index.xml" type="application/rss+xml" title="Robert Vojta (𝒵𝓇𝓏𝓀𝒶)">
+    <title>AWS Lambda &amp; API Gateway Error Handling - Robert Vojta (𝒵𝓇𝓏𝓀𝒶)</title>
+</head>
+
+<body>
+
+    <header>
+        <div class="container clearfix">
+            <a class="path" href="https://www.zrzka.dev/">Home</a>
+            <span class="caret">% _</span>
+            <div class="right">
+                
+                
+                <a class="path" href="/services/">Services</a>
+                
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+<main role="main" class="article">
+  
+<article class="single" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="meta">
+
+    <span class="key">published on</span>
+    <span class="val"><time itemprop="datePublished" datetime="2016-04-14">April 14, 2016</time></span>
+
+
+    <span class="key">in</span>
+    <span class="val">
+
+        <a href="/categories/all">all</a>
+
+    </span>
+
+
+    <br>
+    <span class="key">tags:</span>
+    <span class="val">
+
+        <a href="/tags/aws">aws</a>
+
+        <a href="/tags/lambda">lambda</a>
+
+        <a href="/tags/api-gateway">api-gateway</a>
+
+    </span>
+
+  </div>
+  <h1 class="headline" itemprop="headline">AWS Lambda &amp; API Gateway Error Handling</h1>
+  <section class="body" itemprop="articleBody">
+    <p>It’s fragile and kind of terrible. Let’s look at it. We have a function named <em>lambda</em>. It has one
 argument named <em>action</em> (enum with allowed values <em>data</em>, <em>exception</em> or <em>timeout</em>). First thing we
-would like to do is to validate input via <a href=https://github.com/plumatic/schema>schema</a>. Then we
+would like to do is to validate input via <a href="https://github.com/plumatic/schema">schema</a>. Then we
 would like to return custom error message (and status code) if it’s invalid or do other things
-based on the <em>action</em> argument value.</p><p>Here’s the code, just to demonstrate how it works.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-clj data-lang=clj><span style=display:flex><span>(<span style=color:#66d9ef>defn- </span>timeout [ms]
-</span></span><span style=display:flex><span>  (<span style=color:#66d9ef>let </span>[c (<span style=color:#a6e22e>chan</span>)]
-</span></span><span style=display:flex><span>  (<span style=color:#a6e22e>js/setTimeout</span> (<span style=color:#66d9ef>fn </span>[] (<span style=color:#a6e22e>close!</span> c)) ms)
-</span></span><span style=display:flex><span>  c))
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>(<span style=color:#66d9ef>defn- </span>error
-</span></span><span style=display:flex><span>  [code message]
-</span></span><span style=display:flex><span>  (<span style=color:#a6e22e>.stringify</span> js/JSON (<span style=color:#a6e22e>clj-</span><span style=color:#f92672>&amp;</span>gt<span style=color:#75715e>;js {:error-code code :error-message (pr-str message)})))</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>(<span style=color:#66d9ef>def </span>EventSchema
-</span></span><span style=display:flex><span>  {<span style=color:#e6db74>:action</span> (<span style=color:#a6e22e>s/enum</span> <span style=color:#e6db74>&#34;data&#34;</span> <span style=color:#e6db74>&#34;exception&#34;</span> <span style=color:#e6db74>&#34;timeout&#34;</span>)})
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>(<span style=color:#66d9ef>def </span><span style=color:#f92672>^</span><span style=color:#e6db74>:export</span> lambda
-</span></span><span style=display:flex><span>  (<span style=color:#a6e22e>async-lambda-fn</span>
-</span></span><span style=display:flex><span>    (<span style=color:#66d9ef>fn </span>[event context]
-</span></span><span style=display:flex><span>      (<span style=color:#a6e22e>go</span>
-</span></span><span style=display:flex><span>        (if-let [e (<span style=color:#a6e22e>s/check</span> EventSchema event)]
-</span></span><span style=display:flex><span>          (<span style=color:#a6e22e>fail!</span> context (<span style=color:#a6e22e>error</span> <span style=color:#e6db74>&#34;INVALID_PARAMS&#34;</span> e))
-</span></span><span style=display:flex><span>          (<span style=color:#a6e22e>try</span>
-</span></span><span style=display:flex><span>            (<span style=color:#66d9ef>let </span>[action (<span style=color:#e6db74>:action</span> event)]
-</span></span><span style=display:flex><span>              (<span style=color:#a6e22e>cond</span>
-</span></span><span style=display:flex><span>                (= <span style=color:#e6db74>&#34;data&#34;</span> action) (<span style=color:#a6e22e>succeed!</span> context {<span style=color:#e6db74>:some</span> <span style=color:#e6db74>&#34;data&#34;</span>})
-</span></span><span style=display:flex><span>                (= <span style=color:#e6db74>&#34;timeout&#34;</span> action) (<span style=color:#f92672>&amp;</span>lt<span style=color:#75715e>;! (timeout 5000))</span>
-</span></span><span style=display:flex><span>                (= <span style=color:#e6db74>&#34;exception&#34;</span> action) (<span style=color:#a6e22e>throw</span> (<span style=color:#a6e22e>js/Error.</span> <span style=color:#e6db74>&#34;Oops&#34;</span>))))
-</span></span><span style=display:flex><span>          (<span style=color:#a6e22e>catch</span> <span style=color:#e6db74>:default</span> e
-</span></span><span style=display:flex><span>            (<span style=color:#a6e22e>fail!</span> context (<span style=color:#a6e22e>error</span> <span style=color:#e6db74>&#34;EXCEPTION&#34;</span> e)))))))))
+based on the <em>action</em> argument value.</p>
+<p>Here’s the code, just to demonstrate how it works.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-clj" data-lang="clj"><span style="display:flex;"><span>(<span style="color:#66d9ef">defn- </span>timeout [ms]
+</span></span><span style="display:flex;"><span>  (<span style="color:#66d9ef">let </span>[c (<span style="color:#a6e22e">chan</span>)]
+</span></span><span style="display:flex;"><span>  (<span style="color:#a6e22e">js/setTimeout</span> (<span style="color:#66d9ef">fn </span>[] (<span style="color:#a6e22e">close!</span> c)) ms)
+</span></span><span style="display:flex;"><span>  c))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>(<span style="color:#66d9ef">defn- </span>error
+</span></span><span style="display:flex;"><span>  [code message]
+</span></span><span style="display:flex;"><span>  (<span style="color:#a6e22e">.stringify</span> js/JSON (<span style="color:#a6e22e">clj-</span><span style="color:#f92672">&amp;</span>gt<span style="color:#75715e">;js {:error-code code :error-message (pr-str message)})))</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>(<span style="color:#66d9ef">def </span>EventSchema
+</span></span><span style="display:flex;"><span>  {<span style="color:#e6db74">:action</span> (<span style="color:#a6e22e">s/enum</span> <span style="color:#e6db74">&#34;data&#34;</span> <span style="color:#e6db74">&#34;exception&#34;</span> <span style="color:#e6db74">&#34;timeout&#34;</span>)})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>(<span style="color:#66d9ef">def </span><span style="color:#f92672">^</span><span style="color:#e6db74">:export</span> lambda
+</span></span><span style="display:flex;"><span>  (<span style="color:#a6e22e">async-lambda-fn</span>
+</span></span><span style="display:flex;"><span>    (<span style="color:#66d9ef">fn </span>[event context]
+</span></span><span style="display:flex;"><span>      (<span style="color:#a6e22e">go</span>
+</span></span><span style="display:flex;"><span>        (if-let [e (<span style="color:#a6e22e">s/check</span> EventSchema event)]
+</span></span><span style="display:flex;"><span>          (<span style="color:#a6e22e">fail!</span> context (<span style="color:#a6e22e">error</span> <span style="color:#e6db74">&#34;INVALID_PARAMS&#34;</span> e))
+</span></span><span style="display:flex;"><span>          (<span style="color:#a6e22e">try</span>
+</span></span><span style="display:flex;"><span>            (<span style="color:#66d9ef">let </span>[action (<span style="color:#e6db74">:action</span> event)]
+</span></span><span style="display:flex;"><span>              (<span style="color:#a6e22e">cond</span>
+</span></span><span style="display:flex;"><span>                (= <span style="color:#e6db74">&#34;data&#34;</span> action) (<span style="color:#a6e22e">succeed!</span> context {<span style="color:#e6db74">:some</span> <span style="color:#e6db74">&#34;data&#34;</span>})
+</span></span><span style="display:flex;"><span>                (= <span style="color:#e6db74">&#34;timeout&#34;</span> action) (<span style="color:#f92672">&amp;</span>lt<span style="color:#75715e">;! (timeout 5000))</span>
+</span></span><span style="display:flex;"><span>                (= <span style="color:#e6db74">&#34;exception&#34;</span> action) (<span style="color:#a6e22e">throw</span> (<span style="color:#a6e22e">js/Error.</span> <span style="color:#e6db74">&#34;Oops&#34;</span>))))
+</span></span><span style="display:flex;"><span>          (<span style="color:#a6e22e">catch</span> <span style="color:#e6db74">:default</span> e
+</span></span><span style="display:flex;"><span>            (<span style="color:#a6e22e">fail!</span> context (<span style="color:#a6e22e">error</span> <span style="color:#e6db74">&#34;EXCEPTION&#34;</span> e)))))))))
 </span></span></code></pre></div><p>I’m not going to describe how to deploy Lambda function or API Gateway basics. I assume you know how
-to do it. I’m going to focus on error handling only.</p><p>Our function is deployed, API Gateway resource (<em>/lambda</em>) and <em>GET</em> method created and deployed as
-well. All with default settings, just for now.</p><p>What happens when we try to use it?</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>curl -sw <span style=color:#e6db74>&#34;n%{http_code}&#34;</span> -H <span style=color:#e6db74>&#34;x-api-key: ...&#34;</span> -H <span style=color:#e6db74>&#34;Accept: application/json&#34;</span>
-</span></span><span style=display:flex><span>https://...execute-api.eu-west-1.amazonaws.com/latest/lambda
-</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;errorMessage&#34;</span>: <span style=color:#e6db74>&#34;{\&#34;error-code\&#34;:\&#34;INVALID_PARAMS\&#34;,\&#34;error-message\&#34;:\&#34;{:action missing-required-key}\&#34;}&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ae81ff>200</span>
-</span></span></code></pre></div><p>JSON in JSON and status code is 200. <strong>That’s not what we want. At all.</strong></p><h2 id=pass-action-from-query-to-lambdafunction>Pass action from query to lambda function</h2><p><em>POST</em> method handles this automatically. Body is passed via <em>event</em> argument. But <em>GET</em> is a slightly different beast.</p><p><img src=/images/aws/lambda-get-method-request.png alt="Lambda GET method request"></p><p>We have to add <em>action</em> to the URL Query String Parameters section. Then we have to add Body Mapping Template
-(BMT) in the Integration Request section.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;action&#34;</span>: <span style=color:#e6db74>&#34;$input.params(&#39;action&#39;)&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><p>Redeploy API and test.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;errorMessage&#34;</span>: <span style=color:#e6db74>&#34;{\&#34;error-code\&#34;:\&#34;INVALID_PARAMS\&#34;,\&#34;error-message\&#34;:\&#34;{:action (not (#{\&#34;data\&#34; \&#34;exception\&#34; \&#34;timeout\&#34;} \&#34;\&#34;))}\&#34;}&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ae81ff>200</span>
+to do it. I’m going to focus on error handling only.</p>
+<p>Our function is deployed, API Gateway resource (<em>/lambda</em>) and <em>GET</em> method created and deployed as
+well. All with default settings, just for now.</p>
+<p>What happens when we try to use it?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>curl -sw <span style="color:#e6db74">&#34;n%{http_code}&#34;</span> -H <span style="color:#e6db74">&#34;x-api-key: ...&#34;</span> -H <span style="color:#e6db74">&#34;Accept: application/json&#34;</span>
+</span></span><span style="display:flex;"><span>https://...execute-api.eu-west-1.amazonaws.com/latest/lambda
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;errorMessage&#34;</span>: <span style="color:#e6db74">&#34;{\&#34;error-code\&#34;:\&#34;INVALID_PARAMS\&#34;,\&#34;error-message\&#34;:\&#34;{:action missing-required-key}\&#34;}&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">200</span>
+</span></span></code></pre></div><p>JSON in JSON and status code is 200. <strong>That’s not what we want. At all.</strong></p>
+<h2 id="pass-action-from-query-to-lambdafunction">Pass action from query to lambda function</h2>
+<p><em>POST</em> method handles this automatically. Body is passed via <em>event</em> argument. But <em>GET</em> is a slightly different beast.</p>
+<p><img src="/images/aws/lambda-get-method-request.png" alt="Lambda GET method request"></p>
+<p>We have to add <em>action</em> to the URL Query String Parameters section. Then we have to add Body Mapping Template
+(BMT) in the Integration Request section.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;action&#34;</span>: <span style="color:#e6db74">&#34;$input.params(&#39;action&#39;)&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Redeploy API and test.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;errorMessage&#34;</span>: <span style="color:#e6db74">&#34;{\&#34;error-code\&#34;:\&#34;INVALID_PARAMS\&#34;,\&#34;error-message\&#34;:\&#34;{:action (not (#{\&#34;data\&#34; \&#34;exception\&#34; \&#34;timeout\&#34;} \&#34;\&#34;))}\&#34;}&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">200</span>
 </span></span></code></pre></div><p>Much better, we can see validation response. Let’s try some [in]valid options. Status code 200 for all
-of them with following responses.</p><h3 id=actiondata>action=data</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;some&#34;</span>: <span style=color:#e6db74>&#34;data&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h3 id=actiontimeout>action=timeout</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;errorMessage&#34;</span>: <span style=color:#e6db74>&#34;2016–04–14T12:20:20.584Z 3f0e0ca9–023b-11e6-a561-e58695fc8058 Task timed out after 4.00 seconds&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h3 id=actionexception>action=exception</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;errorMessage&#34;</span>: <span style=color:#e6db74>&#34;{\&#34;error-code\&#34;:\&#34;EXCEPTION\&#34;,\&#34;error-message\&#34;:\&#34;#object[Error Error: Oops]\&#34;}&#34;</span>
-</span></span><span style=display:flex><span>}
+of them with following responses.</p>
+<h3 id="actiondata">action=data</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;some&#34;</span>: <span style="color:#e6db74">&#34;data&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="actiontimeout">action=timeout</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;errorMessage&#34;</span>: <span style="color:#e6db74">&#34;2016–04–14T12:20:20.584Z 3f0e0ca9–023b-11e6-a561-e58695fc8058 Task timed out after 4.00 seconds&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="actionexception">action=exception</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;errorMessage&#34;</span>: <span style="color:#e6db74">&#34;{\&#34;error-code\&#34;:\&#34;EXCEPTION\&#34;,\&#34;error-message\&#34;:\&#34;#object[Error Error: Oops]\&#34;}&#34;</span>
+</span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>NOTE: Our lambda function is deployed with <em>timeout</em> set to 4 seconds. Just to make it working,
-check the code, we’re waiting 5 seconds.</p><p>This is not good. We want 200 for success, 400 for invalid input parameters and 500 if something
-bad happens (exception, timeout, …) and better structure of our response.</p><h2 id=mapping-statuscodes>Mapping status codes</h2><p>We have to add 400 and 500 in the Method Response section. Otherwise we’ll not be able to select
-these status codes in the Integration Response section.</p><p><img src=/images/aws/lambda-get-method-response.png alt="Lambda GET method response"></p><p>If lambda function fails, it returns JSON in the following format:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;errorMessage&#34;</span> : <span style=color:#e6db74>&#34;whatever&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><p>And the <em>errorMessage</em> is a string. Do you want to return more than just a string? You have to encode it.</p><p>Open the Integration Response section and you’ll see something like this:</p><p><img src=/images/aws/lambda-method-response-status.png alt="Lambda GET method response status"></p><p>Default mapping uses 200 for the status code, there’s no regex and Body Mapping Template
+check the code, we’re waiting 5 seconds.</p>
+<p>This is not good. We want 200 for success, 400 for invalid input parameters and 500 if something
+bad happens (exception, timeout, …) and better structure of our response.</p>
+<h2 id="mapping-statuscodes">Mapping status codes</h2>
+<p>We have to add 400 and 500 in the Method Response section. Otherwise we’ll not be able to select
+these status codes in the Integration Response section.</p>
+<p><img src="/images/aws/lambda-get-method-response.png" alt="Lambda GET method response"></p>
+<p>If lambda function fails, it returns JSON in the following format:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;errorMessage&#34;</span> : <span style="color:#e6db74">&#34;whatever&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>And the <em>errorMessage</em> is a string. Do you want to return more than just a string? You have to encode it.</p>
+<p>Open the Integration Response section and you’ll see something like this:</p>
+<p><img src="/images/aws/lambda-method-response-status.png" alt="Lambda GET method response status"></p>
+<p>Default mapping uses 200 for the status code, there’s no regex and Body Mapping Template
 (click on the triangle) is empty = passthrough. And because we know what our Lambda function
-returns, we can add some regular expressions there.</p><p><img src=/images/aws/lambda-method-response-statuses.png alt="Lambda GET method response statuses"></p><p>What’s this all about? Lambda Error Regex column contains regular expressions that are matched against
+returns, we can add some regular expressions there.</p>
+<p><img src="/images/aws/lambda-method-response-statuses.png" alt="Lambda GET method response statuses"></p>
+<p>What’s this all about? Lambda Error Regex column contains regular expressions that are matched against
 <em>errorMessage</em> from the lambda response if it indicates it failed (<em>fail!</em> in the code). For
 <em>INVALID_PARAMS</em> we would like to return 400, for any other error message (</em>.+_) we would like to
-return 500 and 200 for the rest.</p><p>Redeploy and test.</p><h3 id=actionexception-1>action=exception</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;errorMessage&#34;</span>: <span style=color:#e6db74>&#34;{\&#34;error-code\&#34;:\&#34;EXCEPTION\&#34;,\&#34;error-message\&#34;:\&#34;#object[Error Error: Oops]\&#34;}&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ae81ff>500</span>
-</span></span></code></pre></div><h3 id=actiontimeout-1>action=timeout</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;errorMessage&#34;</span>: <span style=color:#e6db74>&#34;2016–04–14T12:41:09.348Z 27638414–023e-11e6-bcf3–89b1797fdc7b Task timed out after 4.00 seconds&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ae81ff>500</span>
-</span></span></code></pre></div><h3 id=actionhallo>action=hallo</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;errorMessage&#34;</span>: <span style=color:#e6db74>&#34;{\&#34;error-code\&#34;:\&#34;INVALID_PARAMS\&#34;,\&#34;error-message\&#34;:\&#34;{:action (not (#{\&#34;data\&#34; \&#34;exception\&#34; \&#34;timeout\&#34;} \&#34;hallo\&#34;))}\&#34;}&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ae81ff>400</span>
-</span></span></code></pre></div><h3 id=actiondata-1>action=data</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;some&#34;</span>: <span style=color:#e6db74>&#34;data&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ae81ff>200</span>
-</span></span></code></pre></div><h2 id=better-response-structure>Better response structure</h2><p>Status codes solved. Now we have to focus on the response structure. It’s quite simple. We can do it
+return 500 and 200 for the rest.</p>
+<p>Redeploy and test.</p>
+<h3 id="actionexception-1">action=exception</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;errorMessage&#34;</span>: <span style="color:#e6db74">&#34;{\&#34;error-code\&#34;:\&#34;EXCEPTION\&#34;,\&#34;error-message\&#34;:\&#34;#object[Error Error: Oops]\&#34;}&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">500</span>
+</span></span></code></pre></div><h3 id="actiontimeout-1">action=timeout</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;errorMessage&#34;</span>: <span style="color:#e6db74">&#34;2016–04–14T12:41:09.348Z 27638414–023e-11e6-bcf3–89b1797fdc7b Task timed out after 4.00 seconds&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">500</span>
+</span></span></code></pre></div><h3 id="actionhallo">action=hallo</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;errorMessage&#34;</span>: <span style="color:#e6db74">&#34;{\&#34;error-code\&#34;:\&#34;INVALID_PARAMS\&#34;,\&#34;error-message\&#34;:\&#34;{:action (not (#{\&#34;data\&#34; \&#34;exception\&#34; \&#34;timeout\&#34;} \&#34;hallo\&#34;))}\&#34;}&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">400</span>
+</span></span></code></pre></div><h3 id="actiondata-1">action=data</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;some&#34;</span>: <span style="color:#e6db74">&#34;data&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">200</span>
+</span></span></code></pre></div><h2 id="better-response-structure">Better response structure</h2>
+<p>Status codes solved. Now we have to focus on the response structure. It’s quite simple. We can do it
 in the Integration Response section as well. We have to add Body Mapping Template for each regular
-expression we already added.</p><p><img src=/images/aws/lambda-response-body-mapping.png alt="Lambda response body mapping"></p><p><img src=/images/aws/lambda-response-body-mapping-code.png alt="Code for the lambda response body mapping"></p><p>As you can see, BMT for 500 is more fancier that the one for 400. Why? AWS can kill our lambda function
+expression we already added.</p>
+<p><img src="/images/aws/lambda-response-body-mapping.png" alt="Lambda response body mapping"></p>
+<p><img src="/images/aws/lambda-response-body-mapping-code.png" alt="Code for the lambda response body mapping"></p>
+<p>As you can see, BMT for 500 is more fancier that the one for 400. Why? AWS can kill our lambda function
 because of timeout for example and then there’s just plain string in the <em>errorMessage</em>. Also our
 lambda can catch exception, send back custom error map and then there’s encoded JSON in the
 <em>errorMessage</em>. And because we <strong>can’t add</strong> two (or more) regular expressions for the same status
-(500 in this case), we have to handle it in the BMT.</p><p>Redeploy and test.</p><h3 id=actionexception-2>action=exception</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;error-code&#34;</span>: <span style=color:#e6db74>&#34;EXCEPTION&#34;</span>,
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;error-message&#34;</span>: <span style=color:#e6db74>&#34;#object[Error Error: Oops]&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ae81ff>500</span>
-</span></span></code></pre></div><h3 id=actiontimeout-2>action=timeout</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;error-code&#34;</span>: <span style=color:#e6db74>&#34;AWS&#34;</span>,
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;error-message&#34;</span>: <span style=color:#e6db74>&#34;2016–04–14T13:50:09.212Z caf1daed-0247–11e6–91f8-d9f9a69fef2c Task timed out after 4.00 seconds&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ae81ff>500</span>
-</span></span></code></pre></div><h3 id=actionhallo-1>action=hallo</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;error-code&#34;</span>: <span style=color:#e6db74>&#34;INVALID_PARAMS&#34;</span>,
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;error-message&#34;</span> : <span style=color:#e6db74>&#34;{:action (not (#{\&#34;data\&#34; \&#34;exception\&#34; \&#34;timeout\&#34;} \&#34;hallo\&#34;))}&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ae81ff>400</span>
-</span></span></code></pre></div><h3 id=actiondata-2>action=data</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;some&#34;</span>:<span style=color:#e6db74>&#34;data&#34;</span>
-</span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span><span style=color:#ae81ff>200</span>
+(500 in this case), we have to handle it in the BMT.</p>
+<p>Redeploy and test.</p>
+<h3 id="actionexception-2">action=exception</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;error-code&#34;</span>: <span style="color:#e6db74">&#34;EXCEPTION&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;error-message&#34;</span>: <span style="color:#e6db74">&#34;#object[Error Error: Oops]&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">500</span>
+</span></span></code></pre></div><h3 id="actiontimeout-2">action=timeout</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;error-code&#34;</span>: <span style="color:#e6db74">&#34;AWS&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;error-message&#34;</span>: <span style="color:#e6db74">&#34;2016–04–14T13:50:09.212Z caf1daed-0247–11e6–91f8-d9f9a69fef2c Task timed out after 4.00 seconds&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">500</span>
+</span></span></code></pre></div><h3 id="actionhallo-1">action=hallo</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;error-code&#34;</span>: <span style="color:#e6db74">&#34;INVALID_PARAMS&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;error-message&#34;</span> : <span style="color:#e6db74">&#34;{:action (not (#{\&#34;data\&#34; \&#34;exception\&#34; \&#34;timeout\&#34;} \&#34;hallo\&#34;))}&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">400</span>
+</span></span></code></pre></div><h3 id="actiondata-2">action=data</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;some&#34;</span>:<span style="color:#e6db74">&#34;data&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">200</span>
 </span></span></code></pre></div><p>Goal reached. Status codes and better response structure for errors. It’s not perfect, there’s
-always room for improvement, but it works.</p><p>It’s a bare minimum you have to do. Pretty rough, okay, terrible, but when you know how to do it …
-Hope it helps, because I spent quite huge amount of time on this.</p></section></article></main></div><footer><div class=container><span class=copyright>&copy; 2020 Robert Vojta (𝒵𝓇𝓏𝓀𝒶) - <a rel=license href=https://creativecommons.org/licenses/by-sa/4.0/>CC BY-SA 4.0</a> - <a href=/site>Site
-Info</a></span></div></footer></body></html>
+always room for improvement, but it works.</p>
+<p>It’s a bare minimum you have to do. Pretty rough, okay, terrible, but when you know how to do it …
+Hope it helps, because I spent quite huge amount of time on this.</p>
+
+  </section>
+</article>
+
+</main>
+
+</div>
+
+<footer>
+    <div class="container">
+        <span class="copyright">&copy; 2020 Robert Vojta (𝒵𝓇𝓏𝓀𝒶) - <a rel="license"
+                href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> - <a href="/site">Site
+                Info</a></span>
+    </div>
+</footer>
+
+</body>
+
+</html>
